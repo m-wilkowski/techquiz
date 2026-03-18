@@ -1,0 +1,13 @@
+{
+  "name": "techquiz",
+  "version": "1.0.0",
+  "description": "Interaktywny quiz techniczny dla uczniów technikum — generowany przez AI na podstawie materiałów",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  }
+}
