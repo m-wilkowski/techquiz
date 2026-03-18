@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TechQuiz — Nauka przez rozumienie | CYRBER</title>
-<link rel="icon" type="image/png" href="/toperz.png">
+<link rel="icon" type="image/png" href="/favicon.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
@@ -2598,23 +2598,21 @@ async function generateQuiz() {
       });
 
       if (!res.ok) {
+        console.warn(`Batch ${b+1} failed:`, res.status);
+        if (allQuestions.length > 0) continue; // skip failed batch if we already have some
         let errMsg = 'Błąd serwera';
-        try {
-          const err = await res.json();
-          errMsg = err.error || errMsg;
-        } catch(_) {
-          if (res.status === 504) errMsg = 'Timeout — spróbuj z mniejszą liczbą pytań.';
-          else errMsg = `Błąd serwera (${res.status}).`;
-        }
+        try { const err = await res.json(); errMsg = err.error || errMsg; } catch(_) {}
         throw new Error(errMsg);
       }
 
       let data;
       try { data = await res.json(); } catch(_) {
+        if (allQuestions.length > 0) continue;
         throw new Error('Błąd odczytu odpowiedzi.');
       }
 
       if (!data.questions?.length) {
+        if (allQuestions.length > 0) continue;
         throw new Error('Brak pytań w odpowiedzi.');
       }
 
@@ -2970,14 +2968,19 @@ function showResults() {
 // ─── LOGO HOME ──────────────────────────────────────────────────────────────
 $('logoHome').addEventListener('click', () => {
   clearInterval(state._timerInterval);
-  if (state.questions.length > 0 && state.current < state.questions.length) {
-    saveSession();
-  }
   state.questions = [];
   state.answers = [];
   state.score = 0;
   state.current = 0;
+  state.file = null;
+  state.fileText = '';
+  state.lastMaterial = '';
   $('headerScore').style.display = 'none';
+  $('fileInput').value = '';
+  $('textInput').value = '';
+  $('filePreview').classList.remove('show');
+  $('btnGenerate').disabled = true;
+  clearSession();
   initProfileScreen();
   showScreen('profile');
 });
@@ -3009,13 +3012,21 @@ $('btnQuitQuiz').addEventListener('click', () => {
   state.answers = [];
   state.score = 0;
   state.current = 0;
+  state.file = null;
+  state.fileText = '';
+  state.lastMaterial = '';
   $('headerScore').style.display = 'none';
+  $('fileInput').value = '';
+  $('textInput').value = '';
+  $('filePreview').classList.remove('show');
+  $('btnGenerate').disabled = true;
   clearSession();
   initProfileScreen();
   showScreen('profile');
 });
 
 $('btnResetQuiz').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
   state.current = 0;
   state.answers = [];
   state.score = 0;
