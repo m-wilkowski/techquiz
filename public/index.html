@@ -769,6 +769,80 @@ select:focus { border-color: var(--accent); }
 }
 .results-actions .btn { flex: 1; min-width: 140px; }
 
+/* STREAK BAR */
+.streak-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: linear-gradient(145deg, var(--surface), rgba(15,22,35,0.6));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  justify-content: space-around;
+}
+
+.streak-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.streak-icon { font-size: 16px; }
+.streak-val { font-weight: 700; color: var(--accent); font-size: 14px; }
+.streak-label { color: var(--text3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* IDK BUTTON */
+.quiz-tools {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-idk {
+  background: none;
+  border: 1px dashed var(--accent2);
+  color: var(--accent2);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+.btn-idk:hover {
+  opacity: 1;
+  background: var(--accent2-dim);
+  border-style: solid;
+}
+.btn-idk.used { display: none; }
+
+/* WEAK TOPICS */
+.weak-topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weak-topic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.weak-topic-icon { font-size: 14px; flex-shrink: 0; }
+
 /* FOOTER */
 .footer {
   margin-top: 40px;
@@ -845,6 +919,29 @@ select:focus { border-color: var(--accent); }
       <div class="score-val" id="headerScoreVal">0/0</div>
     </div>
   </header>
+
+  <div class="streak-bar" id="streakBar">
+    <div class="streak-item">
+      <span class="streak-icon">🔥</span>
+      <span class="streak-val" id="streakCount">0</span>
+      <span class="streak-label">seria</span>
+    </div>
+    <div class="streak-item">
+      <span class="streak-icon">📝</span>
+      <span class="streak-val" id="totalQuizzes">0</span>
+      <span class="streak-label">quizów</span>
+    </div>
+    <div class="streak-item">
+      <span class="streak-icon">🧠</span>
+      <span class="streak-val" id="avgScore">—</span>
+      <span class="streak-label">średnia</span>
+    </div>
+    <div class="streak-item">
+      <span class="streak-icon">⚡</span>
+      <span class="streak-val" id="bestScore">—</span>
+      <span class="streak-label">rekord</span>
+    </div>
+  </div>
 
   <!-- SCREEN: UPLOAD -->
   <div class="screen active" id="screenUpload">
@@ -936,9 +1033,12 @@ select:focus { border-color: var(--accent); }
 
       <div class="options" id="optionsList"></div>
 
-      <div class="hint-wrap" id="hintWrap">
-        <button class="btn-hint" id="btnHint">💡 Pokaż wskazówkę</button>
-        <div class="hint-text" id="hintText"></div>
+      <div class="quiz-tools">
+        <div class="hint-wrap" id="hintWrap">
+          <button class="btn-hint" id="btnHint">💡 Pokaż wskazówkę</button>
+          <div class="hint-text" id="hintText"></div>
+        </div>
+        <button class="btn-idk" id="btnIdk">🤔 Nie wiem — wytłumacz mi</button>
       </div>
 
       <div class="feedback" id="feedbackPanel">
@@ -951,7 +1051,7 @@ select:focus { border-color: var(--accent); }
       </button>
 
       <div class="kbd-hint">
-        Skróty: <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> — odpowiedź &nbsp; <kbd>H</kbd> — wskazówka &nbsp; <kbd>Enter</kbd> — dalej
+        Skróty: <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> — odpowiedź &nbsp; <kbd>?</kbd> — nie wiem &nbsp; <kbd>H</kbd> — wskazówka &nbsp; <kbd>Enter</kbd> — dalej
       </div>
     </div>
   </div>
@@ -995,12 +1095,20 @@ select:focus { border-color: var(--accent); }
       <div class="review-list" id="reviewList"></div>
     </div>
 
+    <div class="weak-topics-card card" id="weakTopicsCard" style="display:none">
+      <div class="card-label">Nad czym popracować</div>
+      <div class="weak-topics-list" id="weakTopicsList"></div>
+    </div>
+
     <div class="results-actions">
       <button class="btn btn-ghost" id="btnNewMaterial">
         📂 Nowy materiał
       </button>
+      <button class="btn btn-ghost" id="btnRetryWrong" style="display:none">
+        🎯 Powtórz tylko błędne
+      </button>
       <button class="btn btn-primary" id="btnRetry">
-        🔄 Spróbuj ponownie z tym materiałem
+        🔄 Nowe pytania z tego materiału
       </button>
     </div>
   </div>
@@ -1327,25 +1435,31 @@ function renderQuestion() {
     $('hintWrap').style.display = 'none';
   }
 
-  // Feedback reset
+  // Feedback & IDK reset
   $('feedbackPanel').classList.remove('show','is-correct','is-wrong');
   $('btnNext').classList.remove('show');
+  $('btnIdk').classList.remove('used');
 }
 
 function selectAnswer(chosenId) {
   const q = state.questions[state.current];
   const correct = q.correct;
-  const isCorrect = chosenId === correct;
+  const isIdk = chosenId === '__IDK__';
+  const isCorrect = !isIdk && chosenId === correct;
 
   if (isCorrect) state.score++;
 
   // Record answer
   state.answers.push({
     questionId: state.current,
-    chosen: chosenId,
+    chosen: isIdk ? 'IDK' : chosenId,
     correct: correct,
-    isCorrect
+    isCorrect,
+    usedIdk: isIdk
   });
+
+  // Hide IDK button
+  $('btnIdk').classList.add('used');
 
   // Lock options
   const opts = $('optionsList').querySelectorAll('.option');
@@ -1354,7 +1468,7 @@ function selectAnswer(chosenId) {
     const id = o.dataset.id;
     if (id === correct) {
       o.classList.add('correct');
-    } else if (id === chosenId && !isCorrect) {
+    } else if (!isIdk && id === chosenId && !isCorrect) {
       o.classList.add('wrong');
     } else if (id !== correct) {
       o.classList.add('dimmed');
@@ -1364,16 +1478,26 @@ function selectAnswer(chosenId) {
   // Feedback
   const fb = $('feedbackPanel');
   fb.classList.add('show');
+  const correctOpt = q.options.find(o => o.id === correct);
 
   if (isCorrect) {
     fb.classList.add('is-correct');
-    $('feedbackHeader').innerHTML = '✅ Poprawna odpowiedź!';
+    $('feedbackHeader').innerHTML = '✅ Dobrze! Rozumiesz to.';
     $('feedbackBody').innerHTML = q.explanation;
+  } else if (isIdk) {
+    fb.classList.add('is-wrong');
+    $('feedbackHeader').innerHTML = '🧠 Dobra decyzja — uczysz się zamiast zgadywać!';
+    $('feedbackBody').innerHTML = `
+      <div style="margin-bottom:10px; color: var(--accent); font-weight: 600;">Przeczytaj uważnie — to jest klucz do zrozumienia:</div>
+      ${q.explanation}
+      <div class="correct-answer-note">
+        ✅ Poprawna odpowiedź: <strong>${correct}. ${correctOpt?.text || ''}</strong>
+      </div>
+    `;
   } else {
     fb.classList.add('is-wrong');
     const chosenOpt = q.options.find(o => o.id === chosenId);
-    const correctOpt = q.options.find(o => o.id === correct);
-    $('feedbackHeader').innerHTML = '❌ Błędna odpowiedź';
+    $('feedbackHeader').innerHTML = '❌ Nie tym razem — przeczytaj dlaczego:';
     $('feedbackBody').innerHTML = `
       ${q.explanation}
       <div class="correct-answer-note">
@@ -1438,10 +1562,24 @@ function showResults() {
 
   // Title
   let title, subtitle;
-  if (pct >= 90) { title = '🏆 Doskonały wynik!'; subtitle = 'Świetnie opanowany materiał.'; }
-  else if (pct >= 70) { title = '👍 Dobry wynik!'; subtitle = 'Kilka rzeczy warto powtórzyć.'; }
-  else if (pct >= 50) { title = '📚 Jeszcze trochę pracy'; subtitle = 'Przejrzyj wyjaśnienia poniżej.'; }
-  else { title = '🔄 Wróć do materiału'; subtitle = 'Powtórz notatki i spróbuj ponownie.'; }
+  const idkCount = state.answers.filter(a => a.usedIdk).length;
+
+  if (pct >= 90) {
+    title = '🏆 Rozumiesz ten temat!';
+    subtitle = 'Materiał opanowany — na sprawdzianie dasz radę.';
+  } else if (pct >= 70) {
+    title = '👍 Coraz lepiej!';
+    subtitle = 'Przejrzyj wyjaśnienia do błędnych — uzupełnij luki.';
+  } else if (pct >= 50) {
+    title = '📚 W dobrym kierunku';
+    subtitle = 'Kliknij "Powtórz tylko błędne" i przeczytaj wyjaśnienia.';
+  } else if (idkCount > wrongAnswers.length / 2) {
+    title = '🧠 Dobra strategia!';
+    subtitle = 'Zamiast zgadywać — przeczytałeś wyjaśnienia. Teraz powtórz quiz.';
+  } else {
+    title = '🔄 Przeczytaj wyjaśnienia';
+    subtitle = 'Nie wkuwaj na pamięć — zrozum mechanizmy poniżej i spróbuj ponownie.';
+  }
 
   $('resultsTitle').textContent = title;
   $('resultsSubtitle').textContent = subtitle;
@@ -1449,6 +1587,35 @@ function showResults() {
   $('statCorrect').textContent = correct;
   $('statWrong').textContent = wrong;
   $('statPct').textContent = pct + '%';
+
+  // Record to stats
+  recordQuizResult(pct);
+
+  // Show "retry wrong" button if there are wrong answers
+  const wrongAnswers = state.answers.filter(a => !a.isCorrect);
+  $('btnRetryWrong').style.display = wrongAnswers.length > 0 ? 'inline-flex' : 'none';
+
+  // Weak topics analysis
+  const weakCard = $('weakTopicsCard');
+  const weakList = $('weakTopicsList');
+  weakList.innerHTML = '';
+
+  if (wrongAnswers.length > 0) {
+    weakCard.style.display = 'block';
+    wrongAnswers.forEach(ans => {
+      const q = state.questions[ans.questionId];
+      const div = document.createElement('div');
+      div.className = 'weak-topic';
+      const label = ans.usedIdk ? 'Nie wiedział(a)' : 'Błędna odpowiedź';
+      div.innerHTML = `
+        <span class="weak-topic-icon">${ans.usedIdk ? '🤔' : '❌'}</span>
+        <div><strong>${label}:</strong> ${q.question.slice(0, 100)}${q.question.length > 100 ? '...' : ''}</div>
+      `;
+      weakList.appendChild(div);
+    });
+  } else {
+    weakCard.style.display = 'none';
+  }
 
   // Review list
   const list = $('reviewList');
@@ -1469,9 +1636,13 @@ function showResults() {
       <div class="review-answer">
         ${ans.isCorrect
           ? `<span class="r-c">Twoja odpowiedź: ${ans.chosen}. ${chosenOpt?.text}</span>`
-          : `<span class="r-w">Twoja odpowiedź: ${ans.chosen}. ${chosenOpt?.text}</span>
-             &nbsp;→&nbsp;
-             <span class="r-c">Poprawna: ${ans.correct}. ${correctOpt?.text}</span>`
+          : ans.usedIdk
+            ? `<span class="r-w">Użyto: "Nie wiem"</span>
+               &nbsp;→&nbsp;
+               <span class="r-c">Poprawna: ${ans.correct}. ${correctOpt?.text}</span>`
+            : `<span class="r-w">Twoja odpowiedź: ${ans.chosen}. ${chosenOpt?.text}</span>
+               &nbsp;→&nbsp;
+               <span class="r-c">Poprawna: ${ans.correct}. ${correctOpt?.text}</span>`
         }
       </div>
       <div class="review-explain">${q.explanation}</div>
@@ -1480,10 +1651,32 @@ function showResults() {
   });
 }
 
+// ─── "NIE WIEM" BUTTON ─────────────────────────────────────────────────────
+$('btnIdk').addEventListener('click', () => {
+  const q = state.questions[state.current];
+  // Count as wrong, but show teaching explanation
+  selectAnswer('__IDK__');
+});
+
+// ─── RETRY BUTTONS ──────────────────────────────────────────────────────────
 $('btnRetry').addEventListener('click', () => {
-  // Regenerate NEW questions from same material (not just reshuffle)
   showScreen('upload');
   generateQuiz();
+});
+
+$('btnRetryWrong').addEventListener('click', () => {
+  // Replay only wrong questions (reshuffled)
+  const wrongQs = state.answers
+    .filter(a => !a.isCorrect)
+    .map(a => state.questions[a.questionId]);
+  if (wrongQs.length === 0) return;
+  state.questions = wrongQs.sort(() => Math.random() - 0.5);
+  state.current = 0;
+  state.answers = [];
+  state.score = 0;
+  $('headerScore').style.display = 'block';
+  showScreen('quiz');
+  renderQuestion();
 });
 
 $('btnNewMaterial').addEventListener('click', () => {
@@ -1501,6 +1694,62 @@ $('btnNewMaterial').addEventListener('click', () => {
   $('headerScore').style.display = 'none';
   showScreen('upload');
 });
+
+// ─── STATS (localStorage) ────────────────────────────────────────────────────
+function loadStats() {
+  try {
+    return JSON.parse(localStorage.getItem('tq_stats')) || { quizzes: 0, scores: [], streak: 0, lastDate: null, best: 0 };
+  } catch(_) {
+    return { quizzes: 0, scores: [], streak: 0, lastDate: null, best: 0 };
+  }
+}
+
+function saveStats(stats) {
+  localStorage.setItem('tq_stats', JSON.stringify(stats));
+}
+
+function updateStatsDisplay() {
+  const stats = loadStats();
+  $('streakCount').textContent = stats.streak;
+  $('totalQuizzes').textContent = stats.quizzes;
+  if (stats.scores.length > 0) {
+    const avg = Math.round(stats.scores.reduce((a,b) => a+b, 0) / stats.scores.length);
+    $('avgScore').textContent = avg + '%';
+  } else {
+    $('avgScore').textContent = '—';
+  }
+  $('bestScore').textContent = stats.best > 0 ? stats.best + '%' : '—';
+}
+
+function recordQuizResult(pct) {
+  const stats = loadStats();
+  const today = new Date().toDateString();
+
+  stats.quizzes++;
+  stats.scores.push(pct);
+  if (stats.scores.length > 50) stats.scores = stats.scores.slice(-50); // keep last 50
+
+  if (pct > stats.best) stats.best = pct;
+
+  // Streak logic — one quiz per day keeps the streak
+  if (stats.lastDate === today) {
+    // Already counted today
+  } else {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (stats.lastDate === yesterday) {
+      stats.streak++;
+    } else if (stats.lastDate !== today) {
+      stats.streak = 1;
+    }
+  }
+  stats.lastDate = today;
+
+  saveStats(stats);
+  updateStatsDisplay();
+}
+
+// Init stats display
+updateStatsDisplay();
 
 // ─── KEYBOARD SHORTCUTS ──────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
@@ -1526,6 +1775,11 @@ document.addEventListener('keydown', e => {
   // H for hint
   if (key === 'H' && $('hintWrap').style.display !== 'none') {
     $('btnHint').click();
+  }
+
+  // ? or / for "nie wiem"
+  if ((e.key === '?' || e.key === '/') && !$('btnIdk').classList.contains('used')) {
+    $('btnIdk').click();
   }
 });
 
