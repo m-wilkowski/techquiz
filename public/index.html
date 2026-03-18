@@ -744,6 +744,31 @@ select:focus { border-color: var(--accent); }
   border-color: var(--wrong);
   color: var(--wrong);
 }
+.btn-topbar-accent {
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 0.7;
+}
+.btn-topbar-accent:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  opacity: 1;
+}
+
+/* HISTORY FOOTER */
+.history-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.history-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+}
 
 /* QUIZ SCREEN LAYOUT */
 #screenQuiz {
@@ -1520,6 +1545,10 @@ select:focus { border-color: var(--accent); }
     <div class="card history-section" id="historyCard" style="display:none">
       <div class="card-label">Ostatnie materiały</div>
       <div id="historyList"></div>
+      <div class="history-footer">
+        <span class="history-count" id="historyCount"></span>
+        <button class="btn-topbar" id="btnClearHistory">🗑 Wyczyść historię</button>
+      </div>
     </div>
 
     <button class="btn btn-primary" id="btnGenerate" disabled>
@@ -1533,6 +1562,7 @@ select:focus { border-color: var(--accent); }
       <div class="quiz-topbar-btns">
         <button class="btn-topbar" id="btnQuitQuiz" title="Wróć do menu">✕ Wyjdź</button>
         <button class="btn-topbar" id="btnResetQuiz" title="Zacznij quiz od początku">↺ Od początku</button>
+        <button class="btn-topbar btn-topbar-accent" id="btnReloadQuiz" title="Nowe pytania z tego materiału">🔄 Nowe pytania</button>
       </div>
       <div class="progress-wrap">
         <div class="progress-header">
@@ -1886,6 +1916,7 @@ function renderHistory() {
     `;
     list.appendChild(item);
   });
+  $('historyCount').textContent = `${history.length} / 20 quizów`;
 }
 
 // Profile card clicks
@@ -2522,6 +2553,27 @@ function showResults() {
     list.appendChild(item);
   });
 }
+
+// ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
+// ─── CLEAR HISTORY ──────────────────────────────────────────────────────────
+$('btnClearHistory').addEventListener('click', () => {
+  if (!state.profile) return;
+  profileSet('history', []);
+  // Clear from Supabase
+  supaRest(`history?profile_id=eq.${state.profile}`, { method: 'DELETE' }).catch(() => {});
+  renderHistory();
+});
+
+// ─── RELOAD QUIZ (new questions, same material) ─────────────────────────────
+$('btnReloadQuiz').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
+  state._retryCount = state.questions.length;
+  state.questions = [];
+  state.answers = [];
+  state.score = 0;
+  state.current = 0;
+  generateQuiz();
+});
 
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 $('btnQuitQuiz').addEventListener('click', () => {
