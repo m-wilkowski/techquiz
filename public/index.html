@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TechQuiz — Nauka przez rozumienie | CYRBER</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2300d4ff'/%3E%3Cstop offset='100%25' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='14' fill='%23000'%3ETQ%3C/text%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
 
@@ -28,6 +29,225 @@
   --text3: #4a5568;
   --mono: 'JetBrains Mono', monospace;
   --sans: 'Syne', sans-serif;
+}
+
+/* LIGHT THEME */
+[data-theme="light"] {
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface2: #f0f2f5;
+  --surface3: #e4e7ec;
+  --border: #d1d5db;
+  --border2: #b8bfc9;
+  --accent: #0891b2;
+  --accent-dim: rgba(8,145,178,0.1);
+  --accent2: #7c3aed;
+  --accent2-dim: rgba(124,58,237,0.1);
+  --correct: #16a34a;
+  --correct-dim: rgba(22,163,74,0.08);
+  --wrong: #dc2626;
+  --wrong-dim: rgba(220,38,38,0.08);
+  --warn: #d97706;
+  --text: #1e293b;
+  --text2: #475569;
+  --text3: #94a3b8;
+}
+
+[data-theme="light"] body::before {
+  background-image:
+    linear-gradient(rgba(8,145,178,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8,145,178,0.06) 1px, transparent 1px);
+}
+
+[data-theme="light"] body::after {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(8,145,178,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 90% 100%, rgba(124,58,237,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(8,145,178,0.03) 0%, transparent 70%);
+}
+
+[data-theme="light"] .card {
+  background: linear-gradient(145deg, var(--surface), rgba(255,255,255,0.9));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+[data-theme="light"] .loading-overlay {
+  background: rgba(245,247,250,0.9);
+}
+
+[data-theme="light"] .option {
+  background: linear-gradient(145deg, var(--surface2), rgba(240,242,245,0.7));
+}
+
+[data-theme="light"] .upload-zone {
+  background: linear-gradient(145deg, var(--surface2), rgba(240,242,245,0.5));
+}
+
+[data-theme="light"] .stat-box {
+  background: linear-gradient(145deg, var(--surface2), rgba(240,242,245,0.6));
+}
+
+[data-theme="light"] .streak-bar {
+  background: linear-gradient(145deg, var(--surface), rgba(255,255,255,0.7));
+}
+
+[data-theme="light"] .logo-mark {
+  box-shadow: 0 0 20px rgba(8,145,178,0.2), 0 0 40px rgba(124,58,237,0.1);
+}
+
+[data-theme="light"] .header-text h1 span {
+  background: linear-gradient(135deg, #0891b2, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .profile-title span {
+  background: linear-gradient(135deg, #0891b2, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .footer-brand {
+  background: linear-gradient(135deg, #0891b2, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .error-toast {
+  background: rgba(220,38,38,0.95);
+}
+
+/* THEME TOGGLE */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: auto;
+  line-height: 1;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* PRINT STYLES */
+@media print {
+  body, body::before, body::after {
+    background: white !important;
+    color: black !important;
+    animation: none !important;
+  }
+  body::before, body::after {
+    display: none !important;
+  }
+  .header, .streak-bar, .footer, .btn, .btn-primary, .btn-ghost, .btn-next,
+  .loading-overlay, .error-toast, .kbd-hint, .profile-indicator,
+  .quiz-tools, .results-actions, .theme-toggle, .progress-wrap,
+  #screenProfile, #screenUpload, #screenQuiz {
+    display: none !important;
+  }
+  #screenResults { display: block !important; }
+  #screenResults .card,
+  #screenResults .weak-topics-card {
+    display: block !important;
+  }
+  .app {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .screen { animation: none !important; }
+  .card {
+    background: white !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    page-break-inside: avoid;
+    margin-bottom: 12px !important;
+    padding: 16px !important;
+    border-radius: 8px !important;
+  }
+  .results-hero {
+    padding: 20px 0 !important;
+  }
+  .results-score-ring svg { filter: none !important; }
+  .ring-fill { filter: none !important; }
+  .score-num, .stat-val, .stat-label, .results-title, .results-subtitle,
+  .review-q, .review-answer, .review-explain, .card-label {
+    color: black !important;
+    -webkit-text-fill-color: black !important;
+  }
+  .review-answer .r-c { color: #16a34a !important; -webkit-text-fill-color: #16a34a !important; }
+  .review-answer .r-w { color: #dc2626 !important; -webkit-text-fill-color: #dc2626 !important; }
+  .stat-val[style*="correct"] { color: #16a34a !important; -webkit-text-fill-color: #16a34a !important; }
+  .stat-val[style*="wrong"] { color: #dc2626 !important; -webkit-text-fill-color: #dc2626 !important; }
+  .stat-val[style*="accent"] { color: #0891b2 !important; -webkit-text-fill-color: #0891b2 !important; }
+  #statCorrect { color: #16a34a !important; -webkit-text-fill-color: #16a34a !important; }
+  #statWrong { color: #dc2626 !important; -webkit-text-fill-color: #dc2626 !important; }
+  #statPct { color: #0891b2 !important; -webkit-text-fill-color: #0891b2 !important; }
+  .review-item {
+    page-break-inside: avoid;
+    border: 1px solid #ddd !important;
+    background: #fafafa !important;
+  }
+  .review-item.r-correct { border-left: 3px solid #16a34a !important; }
+  .review-item.r-wrong { border-left: 3px solid #dc2626 !important; }
+  .review-explain {
+    background: #f5f5f5 !important;
+    border-left: 2px solid #999 !important;
+  }
+  .weak-topic {
+    background: #fff5f5 !important;
+    border: 1px solid #fca5a5 !important;
+    color: #333 !important;
+  }
+  .results-stats {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stat-box {
+    background: #f9f9f9 !important;
+    border: none !important;
+    border-right: 1px solid #ddd !important;
+    border-radius: 0 !important;
+  }
+  .card-label {
+    color: #333 !important;
+  }
+  .card-label::after {
+    background: #ddd !important;
+  }
+  .print-header {
+    display: block !important;
+    text-align: center;
+    padding: 20px 0 16px;
+    border-bottom: 2px solid #333;
+    margin-bottom: 16px;
+  }
+  .print-header h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .print-header .print-meta {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.8;
+  }
+}
+
+.print-header {
+  display: none;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -150,7 +370,6 @@ body::after {
 }
 
 .header-score {
-  margin-left: auto;
   text-align: right;
   display: none;
 }
@@ -1100,6 +1319,7 @@ select:focus { border-color: var(--accent); }
       <h1>Tech<span>Quiz</span></h1>
       <p>nauka przez rozumienie // Powered by CYRBER</p>
     </div>
+    <button class="theme-toggle" id="themeToggle" title="Zmień motyw">🌙</button>
     <div class="profile-indicator show" id="profileIndicator" title="Zmień profil">
       <span class="pi-avatar" id="piAvatar">🎮</span>
       <span class="pi-name" id="piName">—</span>
@@ -1251,6 +1471,12 @@ select:focus { border-color: var(--accent); }
     </div>
   </div>
 
+  <!-- PRINT HEADER (visible only in print) -->
+  <div class="print-header" id="printHeader">
+    <h2>TechQuiz — Wyniki</h2>
+    <div class="print-meta" id="printMeta"></div>
+  </div>
+
   <!-- SCREEN: RESULTS -->
   <div class="screen" id="screenResults">
     <div class="card">
@@ -1301,6 +1527,9 @@ select:focus { border-color: var(--accent); }
       </button>
       <button class="btn btn-ghost" id="btnRetryWrong" style="display:none">
         🎯 Powtórz tylko błędne
+      </button>
+      <button class="btn btn-ghost" id="btnSavePdf">
+        🖨️ Zapisz PDF
       </button>
       <button class="btn btn-primary" id="btnRetry">
         🔄 Nowe pytania z tego materiału
@@ -2209,6 +2438,57 @@ function showError(msg) {
   clearTimeout(errorTimer);
   errorTimer = setTimeout(() => t.classList.remove('show'), 4000);
 }
+
+// ─── THEME TOGGLE ─────────────────────────────────────────────────────────────
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  $('themeToggle').textContent = theme === 'light' ? '☀️' : '🌙';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('tq_theme');
+  const theme = saved || getSystemTheme();
+  applyTheme(theme);
+}
+
+$('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('tq_theme', next);
+  applyTheme(next);
+});
+
+// Listen for system theme changes (only when no user override)
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+  if (!localStorage.getItem('tq_theme')) {
+    applyTheme(getSystemTheme());
+  }
+});
+
+initTheme();
+
+// ─── PDF EXPORT ───────────────────────────────────────────────────────────────
+$('btnSavePdf').addEventListener('click', () => {
+  const total = state.questions.length;
+  const correct = state.score;
+  const pct = Math.round((correct / total) * 100);
+  const profileName = state.profile ? profiles[state.profile].name : 'Nieznany';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pl-PL') + ' ' + now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+
+  // Fill print header
+  $('printMeta').innerHTML =
+    `<strong>Uczen:</strong> ${profileName}<br>` +
+    `<strong>Temat:</strong> ${state.topic}<br>` +
+    `<strong>Data:</strong> ${dateStr}<br>` +
+    `<strong>Wynik:</strong> ${correct}/${total} (${pct}%)`;
+
+  window.print();
+});
 </script>
 </body>
 </html>
