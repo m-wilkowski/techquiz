@@ -1983,39 +1983,53 @@ async function generateQuiz() {
   }, 2000);
 
   try {
-    const body = { material, questionCount: count, difficulty };
+    // Split large quizzes into batches of max 10
+    const BATCH_SIZE = 10;
+    const batches = Math.ceil(count / BATCH_SIZE);
+    let allQuestions = [];
+    let topic = 'Quiz techniczny';
 
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    for (let b = 0; b < batches; b++) {
+      const batchCount = Math.min(BATCH_SIZE, count - b * BATCH_SIZE);
+      $('loadingText').textContent = batches > 1
+        ? `Generuję pytania (${b + 1}/${batches})...`
+        : 'Generuję pytania...';
 
-    if (!res.ok) {
-      let errMsg = 'Błąd serwera';
-      try {
-        const err = await res.json();
-        errMsg = err.error || errMsg;
-      } catch(_) {
-        if (res.status === 504) errMsg = 'Timeout — spróbuj z mniejszą liczbą pytań lub mniejszym plikiem.';
-        else errMsg = `Błąd serwera (${res.status}). Spróbuj ponownie.`;
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ material, questionCount: batchCount, difficulty })
+      });
+
+      if (!res.ok) {
+        let errMsg = 'Błąd serwera';
+        try {
+          const err = await res.json();
+          errMsg = err.error || errMsg;
+        } catch(_) {
+          if (res.status === 504) errMsg = 'Timeout — spróbuj z mniejszą liczbą pytań.';
+          else errMsg = `Błąd serwera (${res.status}).`;
+        }
+        throw new Error(errMsg);
       }
-      throw new Error(errMsg);
+
+      let data;
+      try { data = await res.json(); } catch(_) {
+        throw new Error('Błąd odczytu odpowiedzi.');
+      }
+
+      if (!data.questions?.length) {
+        throw new Error('Brak pytań w odpowiedzi.');
+      }
+
+      // Renumber questions
+      data.questions.forEach((q, i) => { q.id = allQuestions.length + i + 1; });
+      allQuestions = allQuestions.concat(data.questions);
+      if (data.topic) topic = data.topic;
     }
 
-    let data;
-    try {
-      data = await res.json();
-    } catch(_) {
-      throw new Error('Błąd odczytu odpowiedzi. Spróbuj ponownie.');
-    }
-
-    if (!data.questions || !data.questions.length) {
-      throw new Error('Nie udało się wygenerować pytań. Spróbuj z więcej tekstu.');
-    }
-
-    state.questions = data.questions;
-    state.topic = data.topic || 'Quiz techniczny';
+    state.questions = allQuestions;
+    state.topic = topic;
     state.current = 0;
     state.answers = [];
     state.score = 0;
