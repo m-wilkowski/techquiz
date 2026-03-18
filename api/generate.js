@@ -3,6 +3,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET') return res.status(200).json({ debug: true, model: 'claude-sonnet-4-6', version: '2023-06-01', ts: Date.now() });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { material, isPDF, pdfBase64, questionCount = 10, difficulty = 'medium' } = req.body;
@@ -97,7 +98,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2024-01-01'
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
