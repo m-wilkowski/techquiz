@@ -20,20 +20,10 @@ export default async function handler(req, res) {
     hard: 'ANALIZA — łączenie wiedzy i projektowanie'
   };
 
-  const systemPrompt = `Jesteś nauczycielem technikum informatycznego. Uczysz przez ROZUMOWANIE — uczeń ma zrozumieć mechanizm, nie wkuwać na pamięć.
+  const systemPrompt = `Nauczyciel technikum. Pytania testują ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe. Krótkie odpowiedzi. TYLKO JSON.`;
 
-PYTANIA: testuj rozumienie (dlaczego? co się stanie? jaka przyczyna?). Błędne odpowiedzi = typowe błędy myślowe uczniów.
-
-DLA KAŻDEGO PYTANIA podaj:
-- explanation: tok rozumowania krok po kroku, dlaczego poprawna i dlaczego każda błędna. 3-5 zdań.
-- remember: JEDNA kluczowa zasada do zapamiętania (np. "RAID 5 = minimum 3 dyski bo parzystość wymaga danych z co najmniej 2 dysków")
-- trick: mnemonik/analogia/skrót myślowy ułatwiający zapamiętanie (np. "RAID 0 = Zero bezpieczeństwa, Zero redundancji" albo "RAID 1 = lustro — Mirror zaczyna się na 1")
-- realLife: krótki przykład z życia codziennego (np. "To jak trzymanie kopii kluczy u sąsiada — jeśli zgubisz swoje, masz zapas")
-
-Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych backtick-ów.`;
-
-  const jsonInstruction = `TYLKO czysty JSON:
-{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"Tok rozumowania.","remember":"Kluczowa zasada.","trick":"Mnemonik lub analogia.","realLife":"Przykład z życia.","hint":"Wskazówka."}]}`;
+  const jsonInstruction = `TYLKO JSON, krótko:
+{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"2-3 zdania: dlaczego B, dlaczego nie A/C/D.","remember":"1 zasada.","trick":"Mnemonik.","realLife":"Przykład z życia.","hint":"Wskazówka."}]}`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -45,7 +35,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych backtic
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8192,
+        max_tokens: 4096,
         system: systemPrompt,
         messages: [{
           role: 'user',
