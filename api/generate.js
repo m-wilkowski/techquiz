@@ -100,7 +100,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-5-20241022',
         max_tokens: Math.min(16000, questionCount * 500 + 2000),
         system: systemPrompt,
         messages
