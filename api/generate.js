@@ -1,22 +1,34 @@
-export const config = { maxDuration: 300 };
+export const config = { runtime: 'edge' };
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') return res.status(200).json({ debug: true, version: 'streaming-v2' });
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }
+    });
+  }
 
-  const { material, questionCount = 10, difficulty = 'medium' } = req.body;
+  if (req.method === 'GET') {
+    return Response.json({ debug: true, runtime: 'edge', version: 'v3' });
+  }
+
+  if (req.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'Brak klucza API.' });
+    return Response.json({ error: 'Brak klucza API.' }, { status: 500 });
   }
 
+  let body;
+  try { body = await req.json(); } catch(e) {
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const { material, questionCount = 10, difficulty = 'medium' } = body;
+
   if (!material || material.trim().length < 50) {
-    return res.status(400).json({ error: 'Za mało materiału. Dodaj więcej tekstu.' });
+    return Response.json({ error: 'Za mało materiału.' }, { status: 400 });
   }
 
   const difficultyMap = {
@@ -56,15 +68,13 @@ WAŻNE: Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('API error:', response.status, errText);
-      return res.status(502).json({ error: 'Błąd API (' + response.status + '): ' + errText.slice(0, 200) });
+      return Response.json({ error: 'Błąd API (' + response.status + '): ' + errText.slice(0, 200) }, { status: 502, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
     const data = await response.json();
     const raw = data.content?.[0]?.text || '';
-    console.log('Response length:', raw.length);
 
-    // Extract JSON from response
+    // Extract JSON
     let cleaned = raw.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
     const jsonStart = cleaned.indexOf('{');
     const jsonEnd = cleaned.lastIndexOf('}');
@@ -76,23 +86,20 @@ WAŻNE: Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych
     try {
       parsed = JSON.parse(cleaned);
     } catch(e) {
-      // Fix trailing commas
       try {
         parsed = JSON.parse(cleaned.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']'));
       } catch(e2) {
-        console.error('Parse fail:', raw.slice(0, 500));
-        return res.status(500).json({ error: 'Błąd parsowania. Spróbuj ponownie.' });
+        return Response.json({ error: 'Błąd parsowania. Spróbuj ponownie.' }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
 
     if (!parsed.questions?.length) {
-      return res.status(500).json({ error: 'Brak pytań w odpowiedzi.' });
+      return Response.json({ error: 'Brak pytań.' }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
-    return res.status(200).json(parsed);
+    return Response.json(parsed, { headers: { 'Access-Control-Allow-Origin': '*' } });
 
   } catch(err) {
-    console.error('Error:', err);
-    return res.status(500).json({ error: 'Błąd: ' + err.message });
+    return Response.json({ error: 'Błąd: ' + err.message }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
   }
 }
