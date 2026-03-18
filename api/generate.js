@@ -97,10 +97,10 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2025-01-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: Math.min(8000, questionCount * 350 + 1000),
         system: systemPrompt,
         messages
