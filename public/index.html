@@ -2437,7 +2437,6 @@ function showResults() {
 
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 $('btnQuitQuiz').addEventListener('click', () => {
-  if (!confirm('Na pewno chcesz wyjść? Postęp quizu zostanie utracony.')) return;
   state.questions = [];
   state.answers = [];
   state.score = 0;
@@ -2449,7 +2448,6 @@ $('btnQuitQuiz').addEventListener('click', () => {
 });
 
 $('btnResetQuiz').addEventListener('click', () => {
-  if (!confirm('Na pewno chcesz zacząć quiz od początku?')) return;
   state.current = 0;
   state.answers = [];
   state.score = 0;
