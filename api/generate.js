@@ -109,7 +109,9 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('Anthropic error:', errText);
+      console.error('Anthropic error:', response.status, errText);
+      if (response.status === 401) return res.status(502).json({ error: 'Nieprawidłowy klucz API. Sprawdź konfigurację.' });
+      if (response.status === 429) return res.status(502).json({ error: 'Za dużo zapytań. Poczekaj chwilę i spróbuj ponownie.' });
       return res.status(502).json({ error: 'Błąd komunikacji z AI. Spróbuj ponownie.' });
     }
 

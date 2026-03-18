@@ -1331,6 +1331,7 @@ const state = {
   profile: null,        // 'dawid' or 'adrian'
   file: null,
   fileText: '',
+  fileBase64: null,
   questions: [],
   topic: '',
   current: 0,
@@ -1388,16 +1389,31 @@ function selectProfile(id) {
 
   // Restore session if exists
   const session = profileGet('session', null);
-  if (session && session.questions && session.questions.length > 0 && session.current < session.questions.length) {
+  if (session && session.questions && session.questions.length > 0) {
     state.questions = session.questions;
     state.topic = session.topic;
-    state.current = session.current;
-    state.answers = session.answers;
-    state.score = session.score;
+    state.answers = session.answers || [];
+    state.score = session.score || 0;
     state.hintsEnabled = session.hintsEnabled;
     state.lastMaterial = session.lastMaterial || '';
     state.fileText = session.fileText || '';
     state.fileBase64 = session.fileBase64 || null;
+
+    // If last question was already answered, move to next
+    let resumeAt = session.current || 0;
+    if (state.answers.length > resumeAt) {
+      resumeAt = state.answers.length;
+    }
+    state.current = resumeAt;
+
+    // If all questions answered, go to results
+    if (state.current >= state.questions.length) {
+      updateStatsDisplay();
+      showScreen('upload');
+      renderHistory();
+      return;
+    }
+
     $('headerScore').style.display = 'block';
     updateStatsDisplay();
     showScreen('quiz');
@@ -1420,7 +1436,7 @@ function saveSession() {
     score: state.score,
     hintsEnabled: state.hintsEnabled,
     lastMaterial: state.lastMaterial,
-    fileText: state.fileText === '__PDF__' ? '__PDF__' : '',
+    fileText: state.fileText === '__PDF__' ? '__PDF__' : (state.fileText || ''),
     fileBase64: state.fileBase64 || null
   });
 }
@@ -1512,9 +1528,10 @@ function initProfileScreen() {
     // Check for saved session
     try {
       const session = JSON.parse(localStorage.getItem(`tq_${id}_session`));
-      if (session && session.questions && session.current < session.questions.length) {
+      const resumeAt = session ? Math.max(session.current || 0, (session.answers || []).length) : 0;
+      if (session && session.questions && resumeAt < session.questions.length) {
         resume.style.display = 'block';
-        resume.textContent = `▶ Kontynuuj: ${session.topic} (${session.current + 1}/${session.questions.length})`;
+        resume.textContent = `▶ Kontynuuj: ${session.topic} (${resumeAt + 1}/${session.questions.length})`;
       } else {
         resume.style.display = 'none';
       }
@@ -1886,7 +1903,6 @@ function selectAnswer(chosenId) {
   $('btnNext').classList.add('show');
 
   updateHeaderScore();
-  saveSession();
 }
 
 $('btnHint').addEventListener('click', () => {
@@ -1899,8 +1915,8 @@ $('btnHint').addEventListener('click', () => {
 $('btnNext').addEventListener('click', () => {
   if (state.current < state.questions.length - 1) {
     state.current++;
+    saveSession();
     renderQuestion();
-    // Scroll to top of card
     $('questionCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
     showResults();
@@ -1935,10 +1951,12 @@ function showResults() {
 
   setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
 
-  // Title
-  let title, subtitle;
+  // Analyze answers
+  const wrongAnswers = state.answers.filter(a => !a.isCorrect);
   const idkCount = state.answers.filter(a => a.usedIdk).length;
 
+  // Title
+  let title, subtitle;
   if (pct >= 90) {
     title = '🏆 Rozumiesz ten temat!';
     subtitle = 'Materiał opanowany — na sprawdzianie dasz radę.';
@@ -1969,7 +1987,6 @@ function showResults() {
   clearSession();
 
   // Show "retry wrong" button if there are wrong answers
-  const wrongAnswers = state.answers.filter(a => !a.isCorrect);
   $('btnRetryWrong').style.display = wrongAnswers.length > 0 ? 'inline-flex' : 'none';
 
   // Weak topics analysis
@@ -2037,7 +2054,11 @@ $('btnIdk').addEventListener('click', () => {
 
 // ─── RETRY BUTTONS ──────────────────────────────────────────────────────────
 $('btnRetry').addEventListener('click', () => {
-  showScreen('upload');
+  // Reset quiz state before regenerating
+  state.questions = [];
+  state.answers = [];
+  state.score = 0;
+  state.current = 0;
   generateQuiz();
 });
 
