@@ -18,34 +18,37 @@ export default async function handler(req, res) {
   }
 
   const difficultyMap = {
-    easy: 'podstawowe — sprawdzają znajomość definicji i prostych faktów',
-    medium: 'średnie — wymagają rozumienia mechanizmów i zależności, nie tylko zapamiętania',
-    hard: 'trudne — wymagają analizy, porównania kilku koncepcji i rozumowania przyczynowo-skutkowego'
+    easy: 'PODSTAWY — uczeń ma zrozumieć jak coś działa i dlaczego. Pytania budujące fundament: "jak działa X?", "po co stosujemy Y?", "co robi Z?"',
+    medium: 'ROZUMIENIE — uczeń ma rozumieć DLACZEGO coś działa tak a nie inaczej. Pytania wymagające dedukcji: "dlaczego X a nie Y?", "co się stanie gdy...?", "jaka jest przyczyna...?"',
+    hard: 'ANALIZA — uczeń ma łączyć wiedzę i wnioskować. Pytania wymagające porównania mechanizmów, znajdowania przyczyn awarii, projektowania rozwiązań: "który wariant lepszy W TYM scenariuszu i dlaczego?", "co jest przyczyną tego objawu?"'
   };
 
-  const systemPrompt = `Jesteś nauczycielem technikum informatycznego. Twoje pytania mają UCZYĆ, nie sprawdzać.
-Uczeń ma ZROZUMIEĆ dlaczego coś działa tak a nie inaczej — żeby nie musiał się uczyć na pamięć.
+  const systemPrompt = `Jesteś cierpliwym nauczycielem technikum informatycznego. Twój cel to sprawić żeby uczeń ZROZUMIAŁ temat tak dobrze, że nie będzie musiał się uczyć na pamięć — bo jak rozumie mechanizm, to odpowiedź wynika logicznie.
 
-ZASADY TWORZENIA PYTAŃ:
-1. Każde pytanie testuje ROZUMIENIE mechanizmu, nie znajomość definicji
-2. Pytania typu "dlaczego X a nie Y?", "co się stanie gdy...?", "jaki jest powód...?"
-3. Scenariusze praktyczne: "Administrator zauważył że... Co jest przyczyną?"
-4. Porównania: "Czym różni się X od Y w kontekście...?"
-5. Przyczynowo-skutkowe: "Jeśli zmienimy X, to co stanie się z Y i dlaczego?"
+FILOZOFIA: Uczymy przez DEDUKCJĘ i ROZUMOWANIE, nie przez odpytywanie z definicji.
 
-ZASADY DLA ODPOWIEDZI:
-1. Błędne odpowiedzi muszą być LOGICZNIE zbliżone — typowe błędy w rozumowaniu uczniów
-2. Żadna odpowiedź nie może być oczywista ani absurdalna
-3. Każda błędna odpowiedź powinna reprezentować konkretny błąd myślowy
+TYPY PYTAŃ (mieszaj je):
+1. PRZYCZYNOWE: "Dlaczego w RAID 5 potrzeba minimum 3 dysków?" — uczeń musi zrozumieć mechanizm
+2. SCENARIUSZOWE: "Serwer ma macierz RAID 5 z 4 dyskami. Padł jeden dysk. Co się dzieje z danymi i dlaczego?" — praktyczne myślenie
+3. PORÓWNAWCZE: "Firma potrzebuje maksymalnej wydajności odczytu. Dlaczego RAID 0 będzie szybszy niż RAID 1?" — rozumienie różnic
+4. DIAGNOSTYCZNE: "Administrator zauważył spadek wydajności po awarii dysku. W jakiej konfiguracji to nastąpi i dlaczego?" — wnioskowanie z objawów
+5. PROJEKTOWE: "Masz 6 dysków po 1TB. Potrzebujesz max bezpieczeństwa. Która konfiguracja i dlaczego?" — łączenie wiedzy
+6. "CO SIĘ STANIE GDY": "Co się stanie z danymi w RAID 0 gdy padnie jeden z czterech dysków? Dlaczego?" — rozumienie konsekwencji
 
-ZASADY DLA WYJAŚNIEŃ (NAJWAŻNIEJSZE):
-1. Wyjaśnienie MUSI pokazać TOK ROZUMOWANIA krok po kroku
-2. Wyjaśnij DLACZEGO poprawna odpowiedź jest poprawna — jaki mechanizm za tym stoi
-3. Dla KAŻDEJ błędnej odpowiedzi wyjaśnij jaki błąd w rozumowaniu prowadzi do jej wybrania
-4. Użyj analogii lub przykładów z życia jeśli to pomoże zrozumieć
-5. Uczeń po przeczytaniu wyjaśnienia ma ROZUMIEĆ temat, nie tylko znać odpowiedź
+ZASADY DLA BŁĘDNYCH ODPOWIEDZI:
+- Każda błędna odpowiedź = typowy BŁĄD W ROZUMOWANIU ucznia (nie głupota!)
+- Np. "mylenie stripingu z mirroringiem", "zapomnienie o bicie parzystości", "policzenie pojemności bez uwzględnienia redundancji"
+- Uczeń ma myśleć "hmm, to brzmi logicznie ale..." — wtedy uczy się rozróżniać
 
-Język: polski, techniczny ale przystępny. Każde pytanie ma dokładnie 4 opcje (A, B, C, D).
+ZASADY DLA WYJAŚNIEŃ (TO NAJWAŻNIEJSZA CZĘŚĆ!):
+- Zacznij od TOKU ROZUMOWANIA: "Pomyślmy krok po kroku..."
+- Wyjaśnij MECHANIZM stojący za poprawną odpowiedzią (nie tylko "B jest poprawne")
+- Dla KAŻDEJ błędnej odpowiedzi napisz: "Gdybyś wybrał X — to typowy błąd polegający na..." i wyjaśnij JAKI błąd myślowy za tym stoi
+- Użyj ANALOGII z życia codziennego jeśli pomoże (np. "RAID 1 działa jak kserowanie dokumentu — masz dwie kopie")
+- Uczeń po przeczytaniu wyjaśnienia ma ROZUMIEĆ cały mechanizm, nie tylko znać literę odpowiedzi
+- Minimum 5-8 zdań na wyjaśnienie
+
+Język: polski, techniczny ale przystępny dla ucznia technikum. Każde pytanie ma dokładnie 4 opcje (A, B, C, D).
 Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych backtick-ów.`;
 
   const jsonInstruction = `Zwróć TYLKO JSON (bez żadnego innego tekstu):
@@ -62,8 +65,8 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
         { "id": "D", "text": "..." }
       ],
       "correct": "B",
-      "explanation": "Tok rozumowania krok po kroku: 1) dlaczego B jest poprawne — jaki mechanizm za tym stoi, 2) dla każdej błędnej opcji — jaki błąd myślowy prowadzi do jej wybrania. Minimum 4-6 zdań. Celem jest żeby uczeń ZROZUMIAŁ temat, nie tylko zapamiętał odpowiedź.",
-      "hint": "Wskazówka naprowadzająca na tok rozumowania, bez zdradzania odpowiedzi."
+      "explanation": "Pomyślmy krok po kroku: [wyjaśnienie mechanizmu]. Dlatego odpowiedź B jest poprawna — [dlaczego]. Gdybyś wybrał A — to typowy błąd polegający na [opis błędu myślowego]. Opcja C jest błędna bo [wyjaśnienie]. Opcja D — [wyjaśnienie]. [Opcjonalnie: analogia z życia]. Minimum 5-8 zdań.",
+      "hint": "Naprowadzenie na tok rozumowania bez zdradzania odpowiedzi, np. 'Zastanów się jak działa parzystość — ile dysków minimum potrzeba żeby ją obliczyć?'"
     }
   ]
 }`;
@@ -98,7 +101,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8000,
+        max_tokens: Math.min(16000, questionCount * 400 + 2000),
         system: systemPrompt,
         messages
       })
