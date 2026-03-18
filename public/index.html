@@ -548,15 +548,369 @@ textarea::placeholder { color: var(--text3); }
   gap: 14px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — tablets and small screens
+   ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 600px) {
   .settings-grid { grid-template-columns: 1fr; }
-  .results-stats { grid-template-columns: 1fr; gap: 8px; }
+  .results-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .streak-bar { padding: 6px 8px; gap: 4px; }
   .streak-val { font-size: 12px; }
   .streak-label { font-size: 9px; }
   .quiz-topbar { flex-wrap: wrap; }
-  .quiz-topbar .progress-wrap { min-width: 100%; }
+  .quiz-topbar .progress-wrap { min-width: 100%; order: -1; }
   .q-text { font-size: 16px; }
+
+  .app { padding: 4px 12px 12px; }
+  .header { gap: 8px; padding: 8px 0 8px; margin-bottom: 8px; }
+  .header-text h1 { font-size: 16px; }
+  .header-text p { font-size: 10px; margin-top: 1px; }
+  .logo-mark-img { width: 34px; height: 34px; }
+  .logo-mascot { width: 90px; height: 90px; }
+
+  .profile-indicator { margin-left: 8px; padding: 3px 8px; font-size: 10px; }
+
+  .card { padding: 14px; margin-bottom: 10px; border-radius: 12px; }
+
+  /* Profile screen */
+  .profile-screen { padding: 30px 8px; gap: 16px; min-height: auto; }
+  .profile-title { font-size: 22px; }
+  .profile-subtitle { margin-top: -10px; font-size: 11px; }
+  .profile-cards { gap: 12px; width: 100%; }
+  .profile-card { padding: 20px 16px; min-width: 0; flex: 1; border-radius: 16px; }
+  .profile-avatar { width: 56px; height: 56px; font-size: 28px; margin-bottom: 10px; }
+  .profile-name { font-size: 17px; }
+
+  /* Upload screen */
+  .upload-zone { padding: 28px 16px; border-radius: 12px; }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-zone h3 { font-size: 15px; }
+  .upload-zone p { font-size: 12px; }
+  textarea { font-size: 13px; min-height: 100px; padding: 12px; }
+  .divider { margin: 12px 0; font-size: 11px; }
+
+  /* Quiz topbar */
+  .quiz-topbar { gap: 8px; margin-bottom: 8px; }
+  .quiz-topbar-btns { gap: 4px; }
+  .btn-topbar { font-size: 10px; padding: 6px 8px; min-height: 32px; }
+
+  /* Question card */
+  .q-header { margin-bottom: 4px; gap: 8px; }
+  .q-badge { font-size: 10px; }
+  .topic-tag { font-size: 10px; padding: 2px 8px; max-width: 150px; }
+  .q-text { margin-bottom: 12px; line-height: 1.4; }
+
+  /* Options — touch-friendly */
+  .options { gap: 6px; }
+  .option { padding: 12px 14px; gap: 10px; border-radius: 10px; min-height: 44px; }
+  .option-key { width: 28px; height: 28px; font-size: 11px; border-radius: 8px; }
+  .option-text { font-size: 14px; }
+
+  /* Quiz tools */
+  .quiz-tools { margin-top: 8px; gap: 6px; }
+  .btn-hint { padding: 10px 14px; font-size: 12px; min-height: 44px; }
+  .btn-idk { padding: 10px 14px; font-size: 12px; min-height: 44px; }
+  .hint-text { margin-top: 8px; padding: 10px 12px; font-size: 12px; }
+
+  /* Feedback */
+  .feedback { margin-top: 10px; }
+  .feedback-header { padding: 10px 14px; font-size: 14px; }
+  .feedback-body { padding: 10px 12px; font-size: 12px; max-height: 160px; }
+  .learn-box { padding: 8px 12px; font-size: 12px; }
+
+  /* Next button — big touch target */
+  .btn-next { margin-top: 10px; padding: 14px; font-size: 15px; min-height: 48px; border-radius: 12px; }
+
+  /* Hide keyboard hints on touch devices */
+  .kbd-hint { display: none; }
+
+  /* Results */
+  .results-hero { padding: 24px 12px; }
+  .results-score-ring { width: 110px; height: 110px; margin-bottom: 16px; }
+  .score-num { font-size: 30px; }
+  .results-title { font-size: 22px; }
+  .results-subtitle { font-size: 13px; }
+  .stat-box { padding: 12px 8px; border-radius: 10px; }
+  .stat-val { font-size: 20px; }
+  .stat-label { font-size: 11px; }
+  .results-stats { margin-top: 20px; gap: 8px; }
+  .results-actions { gap: 8px; margin-top: 16px; }
+  .results-actions .btn { min-width: 0; font-size: 13px; padding: 12px 14px; min-height: 44px; }
+
+  /* Review items */
+  .review-item { padding: 12px 14px; border-radius: 10px; }
+  .review-q { font-size: 13px; }
+  .review-answer { font-size: 11px; }
+  .review-explain { font-size: 12px; padding: 8px 12px; }
+
+  /* Buttons */
+  .btn { padding: 12px 18px; font-size: 14px; min-height: 44px; }
+  .btn-primary { padding: 14px; font-size: 15px; min-height: 48px; margin-top: 8px; }
+  .btn-ghost { font-size: 13px; padding: 10px 14px; min-height: 44px; }
+
+  /* Footer */
+  .footer { margin-top: 12px; padding: 8px 0; font-size: 10px; }
+
+  /* History */
+  .history-item { padding: 8px 12px; font-size: 12px; }
+
+  /* Streak bar */
+  .streak-item { gap: 4px; }
+  .streak-icon { font-size: 14px; }
+
+  /* Score in header */
+  .header-score .score-val { font-size: 18px; }
+  .header-score .score-label { font-size: 10px; }
+
+  /* Theme toggle — touch-friendly */
+  .theme-toggle { width: 38px; height: 38px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — phones (max 480px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .app { padding: 2px 8px 8px; }
+
+  /* Header — compact single row */
+  .header { gap: 6px; padding: 6px 0; margin-bottom: 6px; }
+  .header-text h1 { font-size: 15px; }
+  .header-text p { display: none; }
+  .logo-mark-img { width: 30px; height: 30px; border-width: 1.5px; }
+  .theme-toggle { width: 36px; height: 36px; font-size: 15px; border-radius: 8px; }
+  .profile-indicator { margin-left: 4px; padding: 3px 6px; font-size: 9px; gap: 4px; }
+  .profile-indicator .pi-avatar { font-size: 12px; }
+
+  /* Profile screen — cards side by side, compact */
+  .profile-screen { padding: 20px 4px; gap: 14px; }
+  .profile-title { font-size: 20px; }
+  .profile-subtitle { font-size: 10px; margin-top: -8px; }
+  .logo-mascot { width: 80px; height: 80px; border-width: 2px; }
+  .profile-cards { gap: 10px; }
+  .profile-card {
+    padding: 16px 12px;
+    border-radius: 14px;
+    border-width: 1.5px;
+  }
+  .profile-avatar { width: 48px; height: 48px; font-size: 24px; margin-bottom: 8px; }
+  .profile-name { font-size: 15px; }
+  .profile-meta { font-size: 10px; }
+  .profile-resume { font-size: 10px; padding: 6px 8px; margin-top: 8px; }
+
+  /* Streak bar — all 4 items fit */
+  .streak-bar { padding: 5px 6px; gap: 2px; border-radius: 10px; margin-bottom: 8px; }
+  .streak-item { gap: 3px; font-size: 11px; }
+  .streak-icon { font-size: 12px; }
+  .streak-val { font-size: 11px; }
+  .streak-label { font-size: 8px; letter-spacing: 0; }
+
+  /* Upload screen */
+  .upload-zone { padding: 20px 12px; }
+  .upload-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone h3 { font-size: 14px; margin-bottom: 4px; }
+  .upload-zone p { font-size: 11px; }
+  .file-types { margin-top: 10px; gap: 6px; }
+  .file-type-badge { font-size: 10px; padding: 2px 8px; }
+  textarea { font-size: 12px; min-height: 80px; padding: 10px; line-height: 1.6; }
+  .divider { margin: 10px 0; font-size: 10px; }
+  .card-label { font-size: 9px; letter-spacing: 1.5px; margin-bottom: 10px; }
+  select { font-size: 13px; padding: 10px; }
+
+  /* Quiz topbar — buttons wrap above progress */
+  .quiz-topbar { gap: 6px; margin-bottom: 6px; }
+  .btn-topbar { font-size: 9px; padding: 5px 6px; border-radius: 5px; min-height: 30px; }
+
+  /* Question — fit on screen before answer */
+  .card { padding: 12px; margin-bottom: 8px; }
+  .q-header { margin-bottom: 2px; }
+  .q-text { font-size: 15px; margin-bottom: 10px; line-height: 1.35; letter-spacing: -0.2px; }
+  .topic-tag { font-size: 9px; padding: 2px 6px; max-width: 120px; }
+
+  /* Options — compact but tappable */
+  .options { gap: 5px; }
+  .option { padding: 10px 12px; gap: 8px; border-radius: 9px; }
+  .option-key { width: 26px; height: 26px; font-size: 10px; border-radius: 7px; }
+  .option-text { font-size: 13px; line-height: 1.35; }
+
+  /* Remove hover transform on mobile — prevents jank */
+  .option:hover:not(.locked) { transform: none; }
+  .option:hover:not(.locked) {
+    box-shadow: -3px 0 0 var(--accent), 0 2px 8px rgba(0,212,255,0.1);
+  }
+
+  /* Quiz tools */
+  .quiz-tools { margin-top: 6px; }
+  .btn-hint { font-size: 11px; padding: 8px 12px; }
+  .btn-idk { font-size: 11px; padding: 8px 12px; }
+
+  /* Feedback — scrollable */
+  .feedback-header { padding: 8px 12px; font-size: 13px; gap: 8px; }
+  .feedback-body { padding: 8px 10px; font-size: 11px; max-height: 140px; }
+  .learn-box { padding: 7px 10px; font-size: 11px; line-height: 1.45; }
+  .correct-answer-note { padding: 8px 10px; font-size: 11px; }
+
+  .btn-next { padding: 12px; font-size: 14px; border-radius: 10px; margin-top: 8px; }
+
+  /* Results screen */
+  .results-hero { padding: 16px 8px; }
+  .results-score-ring { width: 100px; height: 100px; margin-bottom: 14px; }
+  .score-num { font-size: 26px; }
+  .score-denom { font-size: 11px; }
+  .results-title { font-size: 20px; margin-bottom: 6px; }
+  .results-subtitle { font-size: 12px; }
+  .results-stats { margin-top: 16px; gap: 6px; }
+  .stat-box { padding: 10px 6px; border-radius: 8px; }
+  .stat-val { font-size: 18px; }
+  .stat-label { font-size: 10px; }
+  .results-actions { gap: 6px; margin-top: 12px; }
+  .results-actions .btn { font-size: 12px; padding: 10px 10px; }
+
+  /* Review */
+  .review-list { gap: 8px; }
+  .review-item { padding: 10px 12px; }
+  .review-q { font-size: 12px; }
+  .review-answer { font-size: 10px; }
+  .review-explain { font-size: 11px; padding: 7px 10px; }
+
+  /* Weak topics */
+  .weak-topic { padding: 8px 10px; font-size: 12px; gap: 8px; }
+
+  /* Footer */
+  .footer { margin-top: 8px; padding: 6px 0; font-size: 9px; gap: 6px; }
+
+  /* File preview */
+  .file-preview { padding: 10px 12px; gap: 10px; }
+  .file-info .file-name { font-size: 13px; }
+  .file-info .file-size { font-size: 10px; }
+
+  /* History */
+  .history-item { padding: 7px 10px; font-size: 11px; gap: 8px; }
+  .history-score { font-size: 11px; }
+  .history-detail { font-size: 9px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — very small phones (max 380px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 380px) {
+  .app { padding: 2px 6px 6px; }
+
+  /* Header — minimal */
+  .header { gap: 4px; padding: 4px 0; margin-bottom: 4px; }
+  .header-text h1 { font-size: 14px; letter-spacing: -0.3px; }
+  .logo-mark-img { width: 26px; height: 26px; }
+  .theme-toggle { width: 32px; height: 32px; font-size: 14px; }
+  .profile-indicator .pi-name { display: none; }
+  .profile-indicator { padding: 2px 5px; }
+
+  /* Profile — stack cards vertically on very narrow screens */
+  .profile-screen { padding: 16px 2px; gap: 12px; }
+  .profile-title { font-size: 18px; }
+  .logo-mascot { width: 64px; height: 64px; }
+  .profile-cards { flex-direction: column; gap: 8px; }
+  .profile-card { padding: 14px 12px; }
+  .profile-avatar { width: 40px; height: 40px; font-size: 20px; margin-bottom: 6px; }
+  .profile-name { font-size: 14px; }
+
+  /* Streak — even more compact */
+  .streak-bar { padding: 4px 4px; border-radius: 8px; }
+  .streak-label { display: none; }
+  .streak-item { gap: 2px; }
+  .streak-icon { font-size: 11px; }
+  .streak-val { font-size: 10px; }
+
+  /* Question — ultra-compact */
+  .card { padding: 10px; margin-bottom: 6px; border-radius: 10px; }
+  .q-text { font-size: 14px; margin-bottom: 8px; }
+  .q-header { gap: 4px; }
+  .topic-tag { font-size: 8px; padding: 1px 5px; max-width: 100px; }
+  .q-badge { font-size: 9px; }
+
+  .options { gap: 4px; }
+  .option { padding: 9px 10px; gap: 7px; border-radius: 8px; }
+  .option-key { width: 24px; height: 24px; font-size: 9px; border-radius: 6px; }
+  .option-text { font-size: 12px; line-height: 1.3; }
+
+  /* Quiz tools */
+  .quiz-tools { gap: 4px; margin-top: 4px; }
+  .btn-hint { font-size: 10px; padding: 7px 10px; }
+  .btn-idk { font-size: 10px; padding: 7px 10px; }
+
+  /* Feedback */
+  .feedback-body { max-height: 120px; font-size: 10px; }
+  .learn-box { font-size: 10px; padding: 6px 8px; }
+
+  .btn-next { padding: 11px; font-size: 13px; }
+
+  /* Results */
+  .results-score-ring { width: 90px; height: 90px; margin-bottom: 12px; }
+  .score-num { font-size: 24px; }
+  .results-title { font-size: 18px; }
+  .stat-box { padding: 8px 4px; }
+  .stat-val { font-size: 16px; }
+  .stat-label { font-size: 9px; }
+  .results-actions .btn { font-size: 11px; padding: 9px 8px; }
+
+  /* Upload */
+  .upload-zone { padding: 16px 8px; }
+  .upload-icon { font-size: 24px; }
+  .upload-zone h3 { font-size: 13px; }
+  textarea { min-height: 70px; font-size: 11px; padding: 8px; }
+  select { font-size: 12px; padding: 9px; }
+
+  /* Topbar buttons — icon only feel */
+  .btn-topbar { font-size: 8px; padding: 4px 5px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOUCH DEVICE IMPROVEMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects that cause sticky states on touch */
+  .option:hover:not(.locked)::before { opacity: 0; }
+  .option:hover:not(.locked) {
+    border-color: var(--border);
+    transform: none;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .card:hover {
+    border-color: var(--border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .stat-box:hover { transform: none; box-shadow: none; }
+  .profile-card:hover { transform: none; box-shadow: none; }
+  .btn-primary:hover:not(:disabled) { transform: none; }
+  .btn-next:hover { transform: none; box-shadow: none; }
+
+  /* Active states for touch feedback */
+  .option:active:not(.locked) {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+  .profile-card:active {
+    border-color: var(--accent);
+    transform: scale(0.97);
+    transition: transform 0.1s;
+  }
+  .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+  .btn-next:active { transform: scale(0.98); }
+  .btn-ghost:active { transform: scale(0.97); }
+  .btn-hint:active { border-color: var(--warn); color: var(--warn); }
+  .btn-idk:active { opacity: 1; background: var(--accent2-dim); }
+  .history-item:active { border-color: var(--accent); background: var(--accent-dim); }
+
+  /* Prevent text selection on interactive elements */
+  .option, .btn, .btn-primary, .btn-ghost, .btn-next, .btn-hint, .btn-idk,
+  .profile-card, .btn-topbar, .history-item {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Hide keyboard shortcuts hint */
+  .kbd-hint { display: none; }
 }
 
 .field label {
