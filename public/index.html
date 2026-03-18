@@ -1733,6 +1733,20 @@ select:focus { border-color: var(--accent); }
   z-index: 1;
 }
 
+/* PROFILE MANAGE */
+.profile-manage {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.profile-manage .btn-topbar {
+  font-size: 10px;
+  padding: 4px 10px;
+  opacity: 0.5;
+}
+.profile-manage .btn-topbar:hover { opacity: 1; }
+
 /* ACTIVE PROFILE INDICATOR */
 .profile-indicator {
   display: none;
@@ -1810,11 +1824,15 @@ select:focus { border-color: var(--accent); }
           <div class="profile-resume" id="resumeAdrian" style="display:none"></div>
         </div>
       </div>
+      <div class="profile-manage">
+        <button class="btn-topbar" id="btnResetDawid" data-profile="dawid">🗑 Wyczyść dane Dawida</button>
+        <button class="btn-topbar" id="btnResetAdrian" data-profile="adrian">🗑 Wyczyść dane Adriana</button>
+      </div>
     </div>
   </div>
 
   <header class="header" id="mainHeader" style="display:none">
-    <img src="/toperz.png" alt="TQ" class="logo-mark-img">
+    <img src="/toperz.png" alt="TQ" class="logo-mark-img" id="logoHome" style="cursor:pointer" title="Strona główna">
     <div class="header-text">
       <h1>Tech<span>Quiz</span></h1>
       <p>nauka przez rozumienie // Powered by CYRBER</p>
@@ -2930,6 +2948,41 @@ function showResults() {
 }
 
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
+// ─── RESET PROFILE DATA ─────────────────────────────────────────────────────
+['btnResetDawid', 'btnResetAdrian'].forEach(btnId => {
+  $(btnId).addEventListener('click', (e) => {
+    const id = e.currentTarget.dataset.profile;
+    const name = id.charAt(0).toUpperCase() + id.slice(1);
+    if (!confirm(`Usunąć WSZYSTKIE dane ${name}? (historia, statystyki, sesja)`)) return;
+    // Clear localStorage
+    localStorage.removeItem(`tq_${id}_stats`);
+    localStorage.removeItem(`tq_${id}_history`);
+    localStorage.removeItem(`tq_${id}_session`);
+    // Clear Supabase
+    supaRest(`profiles?id=eq.${id}`, {
+      method: 'PATCH',
+      body: { stats: {quizzes:0,scores:[],streak:0,lastDate:null,best:0}, session: null, updated_at: new Date().toISOString() }
+    }).catch(() => {});
+    supaRest(`history?profile_id=eq.${id}`, { method: 'DELETE' }).catch(() => {});
+    initProfileScreen();
+  });
+});
+
+// ─── LOGO HOME ──────────────────────────────────────────────────────────────
+$('logoHome').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
+  if (state.questions.length > 0 && state.current < state.questions.length) {
+    saveSession();
+  }
+  state.questions = [];
+  state.answers = [];
+  state.score = 0;
+  state.current = 0;
+  $('headerScore').style.display = 'none';
+  initProfileScreen();
+  showScreen('profile');
+});
+
 // ─── CLEAR HISTORY ──────────────────────────────────────────────────────────
 $('btnClearHistory').addEventListener('click', () => {
   if (!state.profile) return;
