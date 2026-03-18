@@ -97,7 +97,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2025-01-01'
+        'anthropic-version': '2024-01-01'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
