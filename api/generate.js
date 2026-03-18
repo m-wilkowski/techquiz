@@ -38,7 +38,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych backtic
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: questionCount * 350 + 400,
+        max_tokens: 4096,
         system: systemPrompt,
         messages: [{
           role: 'user',
