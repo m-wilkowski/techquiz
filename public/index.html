@@ -901,6 +901,50 @@ select:focus { border-color: var(--accent); }
   font-size: 12px; color: var(--correct);
 }
 
+/* LEARNING BOXES */
+.learn-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.learn-box {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  display: none;
+}
+.learn-box.show { display: block; animation: fadeUp 0.3s ease; }
+
+.learn-box-remember {
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.25);
+  color: var(--accent);
+}
+
+.learn-box-trick {
+  background: rgba(168,85,247,0.08);
+  border: 1px solid rgba(168,85,247,0.25);
+  color: var(--accent2);
+}
+
+.learn-box-reallife {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.25);
+  color: var(--warn);
+}
+
+/* QUESTION TIMER */
+.q-timer {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
 /* HINT */
 .quiz-tools {
   display: flex; align-items: flex-start;
@@ -1495,6 +1539,7 @@ select:focus { border-color: var(--accent); }
     <div class="card" id="questionCard">
       <div class="q-header">
         <span class="q-badge" id="qBadge">#1</span>
+        <span class="q-timer" id="qTimer">0s</span>
         <span class="topic-tag" id="topicTag">—</span>
       </div>
       <div class="q-text" id="qText">—</div>
@@ -1512,6 +1557,11 @@ select:focus { border-color: var(--accent); }
       <div class="feedback" id="feedbackPanel">
         <div class="feedback-header" id="feedbackHeader"></div>
         <div class="feedback-body" id="feedbackBody"></div>
+        <div class="learn-boxes">
+          <div class="learn-box learn-box-remember" id="learnRemember"></div>
+          <div class="learn-box learn-box-trick" id="learnTrick"></div>
+          <div class="learn-box learn-box-reallife" id="learnReallife"></div>
+        </div>
       </div>
 
       <button class="btn-next" id="btnNext">
@@ -2219,6 +2269,20 @@ function renderQuestion() {
   $('feedbackPanel').classList.remove('show','is-correct','is-wrong');
   $('btnNext').classList.remove('show');
   $('btnIdk').classList.remove('used');
+
+  // Learning boxes reset
+  $('learnRemember').classList.remove('show');
+  $('learnTrick').classList.remove('show');
+  $('learnReallife').classList.remove('show');
+
+  // Timer
+  state._questionStart = Date.now();
+  clearInterval(state._timerInterval);
+  $('qTimer').textContent = '0s';
+  state._timerInterval = setInterval(() => {
+    const elapsed = Math.round((Date.now() - state._questionStart) / 1000);
+    $('qTimer').textContent = elapsed + 's';
+  }, 1000);
 }
 
 function selectAnswer(chosenId) {
@@ -2292,7 +2356,27 @@ function selectAnswer(chosenId) {
   $('btnNext').classList.add('show');
 
   updateHeaderScore();
-  saveSession(); // save after each answer in case browser closes
+
+  // Stop timer
+  clearInterval(state._timerInterval);
+  const elapsed = Math.round((Date.now() - state._questionStart) / 1000);
+  $('qTimer').textContent = elapsed + 's';
+
+  // Show learning boxes
+  if (q.remember) {
+    $('learnRemember').innerHTML = '<strong>💡 Zapamiętaj:</strong> ' + q.remember;
+    $('learnRemember').classList.add('show');
+  }
+  if (q.trick) {
+    $('learnTrick').innerHTML = '<strong>🧠 Trick:</strong> ' + q.trick;
+    $('learnTrick').classList.add('show');
+  }
+  if (q.realLife) {
+    $('learnReallife').innerHTML = '<strong>🌍 Z życia:</strong> ' + q.realLife;
+    $('learnReallife').classList.add('show');
+  }
+
+  saveSession();
 }
 
 $('btnHint').addEventListener('click', () => {
