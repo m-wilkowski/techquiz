@@ -705,6 +705,39 @@ select:focus { border-color: var(--accent); }
   100% { background-position: 200% 50%; }
 }
 
+/* QUIZ TOPBAR */
+.quiz-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.quiz-topbar .progress-wrap {
+  flex: 1;
+  margin-bottom: 0;
+}
+.quiz-topbar-btns {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.btn-topbar {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-topbar:hover {
+  border-color: var(--wrong);
+  color: var(--wrong);
+}
+
 /* QUIZ SCREEN LAYOUT */
 #screenQuiz {
   flex: 1;
@@ -1443,13 +1476,19 @@ select:focus { border-color: var(--accent); }
 
   <!-- SCREEN: QUIZ -->
   <div class="screen" id="screenQuiz">
-    <div class="progress-wrap">
-      <div class="progress-header">
-        <span class="progress-label" id="progressLabel">Pytanie 1 z 10</span>
-        <span class="progress-pct" id="progressPct">0%</span>
+    <div class="quiz-topbar">
+      <div class="quiz-topbar-btns">
+        <button class="btn-topbar" id="btnQuitQuiz" title="Wróć do menu">✕ Wyjdź</button>
+        <button class="btn-topbar" id="btnResetQuiz" title="Zacznij quiz od początku">↺ Od początku</button>
       </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span class="progress-label" id="progressLabel">Pytanie 1 z 10</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
       </div>
     </div>
 
@@ -2334,6 +2373,30 @@ function showResults() {
     list.appendChild(item);
   });
 }
+
+// ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
+$('btnQuitQuiz').addEventListener('click', () => {
+  if (!confirm('Na pewno chcesz wyjść? Postęp quizu zostanie utracony.')) return;
+  state.questions = [];
+  state.answers = [];
+  state.score = 0;
+  state.current = 0;
+  $('headerScore').style.display = 'none';
+  clearSession();
+  initProfileScreen();
+  showScreen('profile');
+});
+
+$('btnResetQuiz').addEventListener('click', () => {
+  if (!confirm('Na pewno chcesz zacząć quiz od początku?')) return;
+  state.current = 0;
+  state.answers = [];
+  state.score = 0;
+  saveSession();
+  $('headerScore').style.display = 'block';
+  renderQuestion();
+  updateHeaderScore();
+});
 
 // ─── "NIE WIEM" BUTTON ─────────────────────────────────────────────────────
 $('btnIdk').addEventListener('click', () => {
