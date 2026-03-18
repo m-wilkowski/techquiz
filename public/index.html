@@ -2594,7 +2594,7 @@ async function generateQuiz() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ material, questionCount: batchCount, difficulty })
+        body: JSON.stringify({ material: material.slice(0, 6000), questionCount: batchCount, difficulty })
       });
 
       if (!res.ok) {
