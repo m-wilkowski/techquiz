@@ -696,6 +696,7 @@ textarea::placeholder { color: var(--text3); }
   .profile-name { font-size: 15px; }
   .profile-meta { font-size: 10px; }
   .profile-resume { font-size: 10px; padding: 6px 8px; margin-top: 8px; }
+  .btn-resume { font-size: 10px; padding: 6px 8px; }
 
   /* Streak bar — all 4 items fit */
   .streak-bar { padding: 5px 6px; gap: 2px; border-radius: 10px; margin-bottom: 8px; }
@@ -1979,6 +1980,41 @@ select:focus { border-color: var(--accent); }
   position: relative;
   z-index: 1;
 }
+.resume-text {
+  margin-bottom: 8px;
+}
+.resume-btns {
+  display: flex;
+  gap: 6px;
+}
+.btn-resume {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.btn-resume-go {
+  background: var(--accent);
+  color: #0a0e17;
+  border-color: var(--accent);
+}
+.btn-resume-go:hover {
+  filter: brightness(1.2);
+}
+.btn-resume-new {
+  background: none;
+  color: var(--text2);
+  border-color: var(--border);
+}
+.btn-resume-new:hover {
+  border-color: var(--wrong);
+  color: var(--wrong);
+}
 
 /* PROFILE MANAGE */
 .profile-manage {
@@ -2062,13 +2098,25 @@ select:focus { border-color: var(--accent); }
           <div class="profile-avatar">🎮</div>
           <div class="profile-name">Dawid</div>
           <div class="profile-meta" id="metaDawid">brak quizów</div>
-          <div class="profile-resume" id="resumeDawid" style="display:none"></div>
+          <div class="profile-resume" id="resumeDawid" style="display:none">
+            <div class="resume-text" id="resumeTextDawid"></div>
+            <div class="resume-btns">
+              <button class="btn-resume btn-resume-go" data-profile="dawid" data-action="continue">Kontynuuj</button>
+              <button class="btn-resume btn-resume-new" data-profile="dawid" data-action="reset">Od nowa</button>
+            </div>
+          </div>
         </div>
         <div class="profile-card" data-profile="adrian">
           <div class="profile-avatar">🎧</div>
           <div class="profile-name">Adrian</div>
           <div class="profile-meta" id="metaAdrian">brak quizów</div>
-          <div class="profile-resume" id="resumeAdrian" style="display:none"></div>
+          <div class="profile-resume" id="resumeAdrian" style="display:none">
+            <div class="resume-text" id="resumeTextAdrian"></div>
+            <div class="resume-btns">
+              <button class="btn-resume btn-resume-go" data-profile="adrian" data-action="continue">Kontynuuj</button>
+              <button class="btn-resume btn-resume-new" data-profile="adrian" data-action="reset">Od nowa</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="profile-manage">
@@ -2487,40 +2535,6 @@ async function selectProfile(id) {
     }
   } catch(e) { console.warn('Sync fetch failed:', e); }
 
-  // Restore session if exists
-  const session = profileGet('session', null);
-  if (session && session.questions && session.questions.length > 0) {
-    state.questions = session.questions;
-    state.topic = session.topic;
-    state.answers = session.answers || [];
-    state.score = session.score || 0;
-    state.hintsEnabled = session.hintsEnabled;
-    state.lastMaterial = session.lastMaterial || '';
-    state.fileText = session.fileText || '';
-    state.fileBase64 = session.fileBase64 || null;
-
-    // If last question was already answered, move to next
-    let resumeAt = session.current || 0;
-    if (state.answers.length > resumeAt) {
-      resumeAt = state.answers.length;
-    }
-    state.current = resumeAt;
-
-    // If all questions answered, go to results
-    if (state.current >= state.questions.length) {
-      updateStatsDisplay();
-      showScreen('upload');
-      renderHistory();
-      return;
-    }
-
-    $('headerScore').style.display = 'block';
-    updateStatsDisplay();
-    showScreen('quiz');
-    renderQuestion();
-    return;
-  }
-
   updateStatsDisplay();
   renderHistory();
   showScreen('upload');
@@ -2614,8 +2628,72 @@ function renderHistory() {
 
 // Profile card clicks
 document.querySelectorAll('.profile-card').forEach(card => {
-  card.addEventListener('click', () => {
+  card.addEventListener('click', (e) => {
+    // Don't select profile if clicking resume buttons
+    if (e.target.closest('.btn-resume')) return;
     selectProfile(card.dataset.profile);
+  });
+});
+
+// Resume session buttons (Kontynuuj / Od nowa)
+document.querySelectorAll('.btn-resume').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const profileId = btn.dataset.profile;
+    const action = btn.dataset.action;
+
+    // Select profile first
+    state.profile = profileId;
+    const p = profiles[profileId];
+    $('piAvatar').textContent = p.avatar;
+    $('piName').textContent = p.name;
+
+    // Sync remote data
+    try {
+      const [profileData] = await supaRest(`profiles?id=eq.${profileId}&select=stats,session`);
+      if (profileData) {
+        if (profileData.stats) profileSet('stats', profileData.stats);
+        if (profileData.session) profileSet('session', profileData.session);
+      }
+    } catch(e) { /* use local */ }
+
+    if (action === 'continue') {
+      // Resume the saved session
+      const session = profileGet('session', null);
+      if (session && session.questions && session.questions.length > 0) {
+        state.questions = session.questions;
+        state.topic = session.topic;
+        state.answers = session.answers || [];
+        state.score = session.score || 0;
+        state.hintsEnabled = session.hintsEnabled;
+        state.lastMaterial = session.lastMaterial || '';
+        state.fileText = session.fileText || '';
+        state.fileBase64 = session.fileBase64 || null;
+        let resumeAt = session.current || 0;
+        if (state.answers.length > resumeAt) resumeAt = state.answers.length;
+        state.current = resumeAt;
+        if (state.current >= state.questions.length) {
+          updateStatsDisplay();
+          renderHistory();
+          showScreen('upload');
+          return;
+        }
+        $('headerScore').style.display = 'block';
+        updateStatsDisplay();
+        showScreen('quiz');
+        renderQuestion();
+      }
+    } else {
+      // Reset — clear session, go to upload
+      clearSession();
+      state.questions = [];
+      state.answers = [];
+      state.score = 0;
+      state.current = 0;
+      updateStatsDisplay();
+      renderHistory();
+      showScreen('upload');
+    }
   });
 });
 
@@ -2662,7 +2740,8 @@ async function initProfileScreen() {
       const resumeAt = session ? Math.max(session.current || 0, (session.answers || []).length) : 0;
       if (session && session.questions && resumeAt < session.questions.length) {
         resume.style.display = 'block';
-        resume.textContent = `▶ Kontynuuj: ${session.topic} (${resumeAt + 1}/${session.questions.length})`;
+        const resumeTextEl = $('resumeText' + id.charAt(0).toUpperCase() + id.slice(1));
+        if (resumeTextEl) resumeTextEl.textContent = `${session.topic} (${resumeAt + 1}/${session.questions.length})`;
       } else {
         resume.style.display = 'none';
       }
@@ -3258,21 +3337,64 @@ function showResults() {
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 // ─── RESET PROFILE DATA ─────────────────────────────────────────────────────
 ['btnResetDawid', 'btnResetAdrian'].forEach(btnId => {
-  $(btnId).addEventListener('click', (e) => {
+  const btnEl = $(btnId);
+  let confirmPending = false;
+  btnEl.addEventListener('click', async (e) => {
     const id = e.currentTarget.dataset.profile;
     const name = id.charAt(0).toUpperCase() + id.slice(1);
-    if (!confirm(`Usunąć WSZYSTKIE dane ${name}? (historia, statystyki, sesja)`)) return;
+
+    // Two-tap confirm: first tap changes button to confirm state
+    if (!confirmPending) {
+      confirmPending = true;
+      btnEl.textContent = `⚠️ Na pewno wyczyścić ${name}? Kliknij ponownie`;
+      btnEl.style.borderColor = 'var(--wrong)';
+      btnEl.style.color = 'var(--wrong)';
+      // Auto-cancel after 4s
+      setTimeout(() => {
+        if (confirmPending) {
+          confirmPending = false;
+          btnEl.textContent = `🗑 Wyczyść dane ${name}`;
+          btnEl.style.borderColor = '';
+          btnEl.style.color = '';
+        }
+      }, 4000);
+      return;
+    }
+
+    // Second tap — actually reset
+    confirmPending = false;
+    btnEl.disabled = true;
+    btnEl.textContent = `⏳ Czyszczenie...`;
+
     // Clear localStorage
     localStorage.removeItem(`tq_${id}_stats`);
     localStorage.removeItem(`tq_${id}_history`);
     localStorage.removeItem(`tq_${id}_session`);
+
     // Clear Supabase
-    supaRest(`profiles?id=eq.${id}`, {
-      method: 'PATCH',
-      body: { stats: {quizzes:0,scores:[],streak:0,lastDate:null,best:0}, session: null, updated_at: new Date().toISOString() }
-    }).catch(() => {});
-    supaRest(`history?profile_id=eq.${id}`, { method: 'DELETE' }).catch(() => {});
-    initProfileScreen();
+    try {
+      await supaRest(`profiles?id=eq.${id}`, {
+        method: 'PATCH',
+        body: { stats: {quizzes:0,scores:[],streak:0,lastDate:null,best:0}, session: null, updated_at: new Date().toISOString() }
+      });
+      await supaRest(`history?profile_id=eq.${id}`, { method: 'DELETE' });
+    } catch(err) {
+      console.warn('Supabase reset error:', err);
+    }
+
+    // Visual feedback
+    btnEl.textContent = `✅ Dane ${name} wyczyszczone!`;
+    btnEl.style.borderColor = 'var(--correct)';
+    btnEl.style.color = 'var(--correct)';
+    await initProfileScreen();
+
+    // Restore button after 2s
+    setTimeout(() => {
+      btnEl.textContent = `🗑 Wyczyść dane ${name}`;
+      btnEl.style.borderColor = '';
+      btnEl.style.color = '';
+      btnEl.disabled = false;
+    }, 2000);
   });
 });
 
@@ -3312,30 +3434,28 @@ $('btnReloadQuiz').addEventListener('click', () => {
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 $('btnQuitQuiz').addEventListener('click', () => {
   clearInterval(state._timerInterval);
-  // Save session so user can continue later
-  if (state.questions.length > 0) saveSession();
-  $('headerScore').style.display = 'none';
-  initProfileScreen();
-  showScreen('profile');
-});
-
-$('btnResetQuiz').addEventListener('click', () => {
-  clearInterval(state._timerInterval);
+  // Clear session — user explicitly quits
+  clearSession();
   state.questions = [];
   state.answers = [];
   state.score = 0;
   state.current = 0;
-  state.file = null;
-  state.fileText = '';
-  state.lastMaterial = '';
   $('headerScore').style.display = 'none';
-  $('fileInput').value = '';
-  $('textInput').value = '';
-  $('filePreview').classList.remove('show');
-  $('btnGenerate').disabled = true;
+  renderHistory();
+  showScreen('upload');
+});
+
+$('btnResetQuiz').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
+  // Keep material loaded but restart quiz from scratch
+  state.questions = [];
+  state.answers = [];
+  state.score = 0;
+  state.current = 0;
+  $('headerScore').style.display = 'none';
   clearSession();
-  initProfileScreen();
-  showScreen('profile');
+  renderHistory();
+  showScreen('upload');
 });
 
 // ─── "NIE WIEM" BUTTON ─────────────────────────────────────────────────────
