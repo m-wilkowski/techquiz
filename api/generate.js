@@ -101,7 +101,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: Math.min(16000, questionCount * 400 + 2000),
+        max_tokens: Math.min(16000, questionCount * 500 + 2000),
         system: systemPrompt,
         messages
       })

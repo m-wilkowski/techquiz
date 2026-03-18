@@ -1449,15 +1449,17 @@ function clearSession() {
 function addToHistory(topic, questionCount, score) {
   if (!state.profile) return;
   const history = profileGet('history', []);
+  const now = new Date();
   history.unshift({
     topic,
     questionCount,
     score,
     pct: Math.round((score / questionCount) * 100),
-    date: new Date().toLocaleDateString('pl-PL')
+    date: now.toLocaleDateString('pl-PL'),
+    time: now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
   });
-  // Keep last 10
-  if (history.length > 10) history.length = 10;
+  // Keep last 20
+  if (history.length > 20) history.length = 20;
   profileSet('history', history);
 }
 
@@ -1482,7 +1484,7 @@ function renderHistory() {
       <span class="history-icon">📚</span>
       <div class="history-info">
         <div class="history-name">${h.topic}</div>
-        <div class="history-detail">${h.date} · ${h.questionCount} pytań</div>
+        <div class="history-detail">${h.date} ${h.time || ''} · ${h.questionCount} pytań</div>
       </div>
       <span class="history-score" style="color:${color}">${h.pct}%</span>
     `;
@@ -1701,9 +1703,12 @@ async function generateQuiz() {
   state.lastMaterial = material;
   state.hintsEnabled = $('hintsEnabled').value === 'yes';
 
-  const count = parseInt($('questionCount').value);
-  const difficulty = $('difficulty').value;
+  const count = state._retryCount || parseInt($('questionCount').value);
+  const difficulty = state._retryDifficulty || $('difficulty').value;
+  state._retryCount = null;
+  state._retryDifficulty = null;
 
+  $('btnGenerate').disabled = true;
   showLoading('Analizuję materiał...');
 
   const messages = [
@@ -1773,6 +1778,7 @@ async function generateQuiz() {
   } catch(e) {
     clearInterval(msgInterval);
     hideLoading();
+    checkGenerateButton(); // re-enable button
     showError(e.message || 'Nieznany błąd. Sprawdź połączenie z internetem.');
   }
 }
@@ -1903,6 +1909,7 @@ function selectAnswer(chosenId) {
   $('btnNext').classList.add('show');
 
   updateHeaderScore();
+  saveSession(); // save after each answer in case browser closes
 }
 
 $('btnHint').addEventListener('click', () => {
@@ -2054,11 +2061,14 @@ $('btnIdk').addEventListener('click', () => {
 
 // ─── RETRY BUTTONS ──────────────────────────────────────────────────────────
 $('btnRetry').addEventListener('click', () => {
-  // Reset quiz state before regenerating
+  // Preserve original settings for retry
+  state._retryCount = state.questions.length;
+  state._retryDifficulty = null; // use current DOM value
   state.questions = [];
   state.answers = [];
   state.score = 0;
   state.current = 0;
+  $('btnGenerate').disabled = true;
   generateQuiz();
 });
 
@@ -2073,6 +2083,7 @@ $('btnRetryWrong').addEventListener('click', () => {
   state.answers = [];
   state.score = 0;
   $('headerScore').style.display = 'block';
+  saveSession();
   showScreen('quiz');
   renderQuestion();
 });
