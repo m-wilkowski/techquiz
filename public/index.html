@@ -2113,7 +2113,6 @@ const state = {
   profile: null,        // 'dawid' or 'adrian'
   file: null,
   fileText: '',
-  fileBase64: null,
   questions: [],
   topic: '',
   current: 0,
@@ -2302,7 +2301,7 @@ function renderHistory() {
     item.innerHTML = `
       <span class="history-icon">📚</span>
       <div class="history-info">
-        <div class="history-name">${h.topic}</div>
+        <div class="history-name">${esc(h.topic)}</div>
         <div class="history-detail">${h.date} ${h.time || ''} · ${h.questionCount} pytań</div>
       </div>
       <span class="history-score" style="color:${color}">${h.pct}%</span>
@@ -2548,7 +2547,7 @@ $('btnGenerate').addEventListener('click', generateQuiz);
 
 async function generateQuiz() {
   const textFromInput = $('textInput').value.trim();
-  const material = state.fileText || textFromInput;
+  const material = state.fileText || textFromInput || state.lastMaterial;
 
   if (!material) {
     showError('Brak materiału. Wgraj plik lub wklej tekst.');
@@ -2675,8 +2674,8 @@ function renderQuestion() {
     btn.className = 'option';
     btn.dataset.id = opt.id;
     btn.innerHTML = `
-      <span class="option-key">${opt.id}</span>
-      <span class="option-text">${opt.text}</span>
+      <span class="option-key">${esc(opt.id)}</span>
+      <span class="option-text">${esc(opt.text)}</span>
     `;
     btn.addEventListener('click', () => selectAnswer(opt.id));
     list.appendChild(btn);
@@ -2754,15 +2753,15 @@ function selectAnswer(chosenId) {
   if (isCorrect) {
     fb.classList.add('is-correct');
     $('feedbackHeader').innerHTML = '✅ Dobrze! Rozumiesz to.';
-    $('feedbackBody').innerHTML = q.explanation;
+    $('feedbackBody').innerHTML = esc(q.explanation);
   } else if (isIdk) {
     fb.classList.add('is-wrong');
     $('feedbackHeader').innerHTML = '🧠 Dobra decyzja — uczysz się zamiast zgadywać!';
     $('feedbackBody').innerHTML = `
       <div style="margin-bottom:10px; color: var(--accent); font-weight: 600;">Przeczytaj uważnie — to jest klucz do zrozumienia:</div>
-      ${q.explanation}
+      ${esc(q.explanation)}
       <div class="correct-answer-note">
-        ✅ Poprawna odpowiedź: <strong>${correct}. ${correctOpt?.text || ''}</strong>
+        ✅ Poprawna odpowiedź: <strong>${esc(correct)}. ${esc(correctOpt?.text)}</strong>
       </div>
     `;
   } else {
@@ -2770,9 +2769,9 @@ function selectAnswer(chosenId) {
     const chosenOpt = q.options.find(o => o.id === chosenId);
     $('feedbackHeader').innerHTML = '❌ Nie tym razem — przeczytaj dlaczego:';
     $('feedbackBody').innerHTML = `
-      ${q.explanation}
+      ${esc(q.explanation)}
       <div class="correct-answer-note">
-        ✅ Poprawna odpowiedź: <strong>${correct}. ${correctOpt?.text || ''}</strong>
+        ✅ Poprawna odpowiedź: <strong>${esc(correct)}. ${esc(correctOpt?.text)}</strong>
       </div>
     `;
   }
@@ -2791,15 +2790,15 @@ function selectAnswer(chosenId) {
 
   // Show learning boxes
   if (q.remember) {
-    $('learnRemember').innerHTML = '<strong>💡 Zapamiętaj:</strong> ' + q.remember;
+    $('learnRemember').innerHTML = '<strong>💡 Zapamiętaj:</strong> ' + esc(q.remember);
     $('learnRemember').classList.add('show');
   }
   if (q.trick) {
-    $('learnTrick').innerHTML = '<strong>🧠 Trick:</strong> ' + q.trick;
+    $('learnTrick').innerHTML = '<strong>🧠 Trick:</strong> ' + esc(q.trick);
     $('learnTrick').classList.add('show');
   }
   if (q.realLife) {
-    $('learnReallife').innerHTML = '<strong>🌍 Z życia:</strong> ' + q.realLife;
+    $('learnReallife').innerHTML = '<strong>🌍 Z życia:</strong> ' + esc(q.realLife);
     $('learnReallife').classList.add('show');
   }
 
@@ -2905,7 +2904,7 @@ function showResults() {
       const label = ans.usedIdk ? 'Nie wiedział(a)' : 'Błędna odpowiedź';
       div.innerHTML = `
         <span class="weak-topic-icon">${ans.usedIdk ? '🤔' : '❌'}</span>
-        <div><strong>${label}:</strong> ${q.question.slice(0, 100)}${q.question.length > 100 ? '...' : ''}</div>
+        <div><strong>${label}:</strong> ${esc(q.question.slice(0, 100))}${q.question.length > 100 ? '...' : ''}</div>
       `;
       weakList.appendChild(div);
     });
@@ -2927,21 +2926,21 @@ function showResults() {
     item.innerHTML = `
       <div class="review-item-header">
         <span class="review-icon">${ans.isCorrect ? '✅' : '❌'}</span>
-        <div class="review-q">${i+1}. ${q.question}</div>
+        <div class="review-q">${i+1}. ${esc(q.question)}</div>
       </div>
       <div class="review-answer">
         ${ans.isCorrect
-          ? `<span class="r-c">Twoja odpowiedź: ${ans.chosen}. ${chosenOpt?.text}</span>`
+          ? `<span class="r-c">Twoja odpowiedź: ${esc(ans.chosen)}. ${esc(chosenOpt?.text)}</span>`
           : ans.usedIdk
             ? `<span class="r-w">Użyto: "Nie wiem"</span>
                &nbsp;→&nbsp;
-               <span class="r-c">Poprawna: ${ans.correct}. ${correctOpt?.text}</span>`
-            : `<span class="r-w">Twoja odpowiedź: ${ans.chosen}. ${chosenOpt?.text}</span>
+               <span class="r-c">Poprawna: ${esc(ans.correct)}. ${esc(correctOpt?.text)}</span>`
+            : `<span class="r-w">Twoja odpowiedź: ${esc(ans.chosen)}. ${esc(chosenOpt?.text)}</span>
                &nbsp;→&nbsp;
-               <span class="r-c">Poprawna: ${ans.correct}. ${correctOpt?.text}</span>`
+               <span class="r-c">Poprawna: ${esc(ans.correct)}. ${esc(correctOpt?.text)}</span>`
         }
       </div>
-      <div class="review-explain">${q.explanation}</div>
+      <div class="review-explain">${esc(q.explanation)}</div>
     `;
     list.appendChild(item);
   });
@@ -3079,6 +3078,14 @@ $('btnNewMaterial').addEventListener('click', () => {
   renderHistory();
   showScreen('upload');
 });
+
+// ─── HTML SANITIZER ──────────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
 
 // ─── STATS (localStorage per profile) ────────────────────────────────────────
 function loadStats() {
