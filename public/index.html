@@ -153,7 +153,7 @@
   .header, .streak-bar, .footer, .btn, .btn-primary, .btn-ghost, .btn-next,
   .loading-overlay, .error-toast, .kbd-hint, .profile-indicator,
   .quiz-tools, .results-actions, .theme-toggle, .progress-wrap,
-  #screenProfile, #screenUpload, #screenQuiz {
+  #screenProfile, #screenUpload, #screenQuiz, #screenSummary, #screenFlashcards {
     display: none !important;
   }
   #screenResults { display: block !important; }
@@ -1562,6 +1562,253 @@ select:focus { border-color: var(--accent); }
 
 .weak-topic-icon { font-size: 14px; flex-shrink: 0; }
 
+/* FLASHCARD SCREEN */
+.flashcard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  flex: 1;
+}
+
+.flashcard-counter {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.flashcard {
+  width: 100%;
+  max-width: 520px;
+  min-height: 240px;
+  perspective: 800px;
+  cursor: pointer;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flashcard-front {
+  position: relative;
+  background: linear-gradient(145deg, var(--surface), rgba(15,22,35,0.8));
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.flashcard-front .fc-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.flashcard-front .fc-question {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.flashcard-front .fc-tap {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 20px;
+}
+
+.flashcard-back {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, var(--surface2), rgba(20,29,46,0.8));
+  border: 1px solid var(--correct);
+  transform: rotateY(180deg);
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.flashcard-back .fc-correct {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--correct);
+  margin-bottom: 4px;
+}
+
+.flashcard-back .fc-explain {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.flashcard-back .fc-extra {
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+
+.fc-extra-remember {
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.25);
+  color: var(--accent);
+}
+
+.fc-extra-trick {
+  background: rgba(168,85,247,0.08);
+  border: 1px solid rgba(168,85,247,0.25);
+  color: var(--accent2);
+}
+
+.flashcard-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.flashcard-actions .btn {
+  flex: 1;
+}
+
+.btn-fc-know {
+  background: var(--correct-dim);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: var(--correct);
+}
+.btn-fc-know:hover {
+  background: rgba(34,197,94,0.2);
+  border-color: var(--correct);
+}
+
+.btn-fc-repeat {
+  background: var(--wrong-dim);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: var(--wrong);
+}
+.btn-fc-repeat:hover {
+  background: rgba(239,68,68,0.2);
+  border-color: var(--wrong);
+}
+
+.flashcard-done {
+  text-align: center;
+  padding: 40px 20px;
+}
+.flashcard-done h3 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.flashcard-done p {
+  color: var(--text2);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* TOPIC SUMMARY SCREEN */
+.summary-container {
+  padding: 10px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.summary-subtitle {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 16px;
+}
+
+.summary-content {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text2);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+/* KNOWLEDGE MAP */
+.knowledge-map-section {
+  margin-top: 0;
+}
+
+.knowledge-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.km-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  transition: transform 0.15s;
+}
+.km-badge:hover { transform: translateY(-1px); }
+
+.km-badge-green {
+  background: var(--correct-dim);
+  border-color: rgba(34,197,94,0.3);
+  color: var(--correct);
+}
+.km-badge-yellow {
+  background: rgba(245,158,11,0.1);
+  border-color: rgba(245,158,11,0.3);
+  color: var(--warn);
+}
+.km-badge-red {
+  background: var(--wrong-dim);
+  border-color: rgba(239,68,68,0.3);
+  color: var(--wrong);
+}
+
+@media (max-width: 600px) {
+  .flashcard { max-width: 100%; }
+  .flashcard-inner { min-height: 200px; }
+  .flashcard-front .fc-question { font-size: 15px; }
+  .flashcard-actions { max-width: 100%; }
+  .flashcard-actions .btn { font-size: 13px; padding: 12px 10px; }
+  .km-badge { font-size: 11px; padding: 4px 10px; }
+}
+
 /* FOOTER */
 .footer {
   margin-top: 20px;
@@ -1944,6 +2191,11 @@ select:focus { border-color: var(--accent); }
       </div>
     </div>
 
+    <div class="card knowledge-map-section" id="knowledgeMapCard" style="display:none">
+      <div class="card-label">Mapa wiedzy</div>
+      <div class="knowledge-map" id="knowledgeMap"></div>
+    </div>
+
     <button class="btn btn-primary" id="btnGenerate" disabled>
       ⚡ Generuj quiz
     </button>
@@ -2006,6 +2258,48 @@ select:focus { border-color: var(--accent); }
     </div>
   </div>
 
+  <!-- SCREEN: TOPIC SUMMARY -->
+  <div class="screen" id="screenSummary">
+    <div class="card summary-container">
+      <div class="card-label">Przeczytaj przed quizem</div>
+      <div class="summary-title" id="summaryTitle">Sciaga — najwazniejsze pojecia</div>
+      <div class="summary-subtitle" id="summarySubtitle">Przejrzyj kluczowe fragmenty materialu zanim zaczniesz quiz</div>
+      <div class="summary-content" id="summaryContent"></div>
+      <button class="btn btn-primary" id="btnStartAfterSummary">Rozumiem, zaczynaj quiz &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: FLASHCARDS -->
+  <div class="screen" id="screenFlashcards">
+    <div class="flashcard-container" id="flashcardContainer">
+      <div class="flashcard-counter" id="flashcardCounter">Fiszka 1/1</div>
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner" id="flashcardInner">
+          <div class="flashcard-front">
+            <div class="fc-label">Pytanie</div>
+            <div class="fc-question" id="fcQuestion"></div>
+            <div class="fc-tap">Kliknij, aby odwrocic</div>
+          </div>
+          <div class="flashcard-back">
+            <div class="fc-correct" id="fcCorrect"></div>
+            <div class="fc-explain" id="fcExplain"></div>
+            <div class="fc-extra fc-extra-remember" id="fcRemember" style="display:none"></div>
+            <div class="fc-extra fc-extra-trick" id="fcTrick" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-actions" id="flashcardActions">
+        <button class="btn btn-fc-know" id="btnFcKnow">Umiem &#10003;</button>
+        <button class="btn btn-fc-repeat" id="btnFcRepeat">Powtorz &#10007;</button>
+      </div>
+    </div>
+    <div class="flashcard-done" id="flashcardDone" style="display:none">
+      <h3>Wszystkie fiszki opanowane!</h3>
+      <p>Swietna robota — znasz odpowiedzi na wszystkie bledne pytania.</p>
+      <button class="btn btn-primary" id="btnFcBackToResults">Wroc do wynikow</button>
+    </div>
+  </div>
+
   <!-- PRINT HEADER (visible only in print) -->
   <div class="print-header" id="printHeader">
     <h2>TechQuiz — Wyniki</h2>
@@ -2062,6 +2356,9 @@ select:focus { border-color: var(--accent); }
       </button>
       <button class="btn btn-ghost" id="btnRetryWrong" style="display:none">
         🎯 Powtórz tylko błędne
+      </button>
+      <button class="btn btn-ghost" id="btnFlashcards" style="display:none">
+        🃏 Fiszki
       </button>
       <button class="btn btn-ghost" id="btnSavePdf">
         🖨️ Zapisz PDF
@@ -2134,7 +2431,9 @@ const screens = {
   profile: $('screenProfile'),
   upload: $('screenUpload'),
   quiz: $('screenQuiz'),
-  results: $('screenResults')
+  results: $('screenResults'),
+  summary: $('screenSummary'),
+  flashcards: $('screenFlashcards')
 };
 
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
@@ -2144,10 +2443,10 @@ function showScreen(name) {
   const showMain = name !== 'profile';
   $('mainHeader').style.display = showMain ? 'flex' : 'none';
   $('streakBar').style.display = showMain ? 'flex' : 'none';
-  // Hide footer and streak during quiz for max space
-  const quizMode = name === 'quiz';
-  document.querySelector('.footer').style.display = quizMode ? 'none' : 'flex';
-  $('streakBar').style.display = (showMain && !quizMode) ? 'flex' : 'none';
+  // Hide footer and streak during quiz/flashcards for max space
+  const compactMode = (name === 'quiz' || name === 'flashcards');
+  document.querySelector('.footer').style.display = compactMode ? 'none' : 'flex';
+  $('streakBar').style.display = (showMain && !compactMode) ? 'flex' : 'none';
 }
 
 // ─── PROFILE SYSTEM ───────────────────────────────────────────────────────────
@@ -2309,6 +2608,8 @@ function renderHistory() {
     list.appendChild(item);
   });
   $('historyCount').textContent = `${history.length} / 20 quizów`;
+  // Also update knowledge map
+  renderKnowledgeMap();
 }
 
 // Profile card clicks
@@ -2630,7 +2931,7 @@ async function generateQuiz() {
 
     clearInterval(msgInterval);
     hideLoading();
-    startQuiz();
+    showTopicSummary();
 
   } catch(e) {
     clearInterval(msgInterval);
@@ -2885,8 +3186,9 @@ function showResults() {
   addToHistory(state.topic, total, correct);
   clearSession();
 
-  // Show "retry wrong" button if there are wrong answers
+  // Show "retry wrong" and "flashcards" buttons if there are wrong answers
   $('btnRetryWrong').style.display = wrongAnswers.length > 0 ? 'inline-flex' : 'none';
+  $('btnFlashcards').style.display = wrongAnswers.length > 0 ? 'inline-flex' : 'none';
 
   // Weak topics analysis
   const weakCard = $('weakTopicsCard');
@@ -2968,19 +3270,11 @@ function showResults() {
 // ─── LOGO HOME ──────────────────────────────────────────────────────────────
 $('logoHome').addEventListener('click', () => {
   clearInterval(state._timerInterval);
-  state.questions = [];
-  state.answers = [];
-  state.score = 0;
-  state.current = 0;
-  state.file = null;
-  state.fileText = '';
-  state.lastMaterial = '';
+  // Save session if quiz in progress
+  if (state.questions.length > 0 && state.current < state.questions.length) {
+    saveSession();
+  }
   $('headerScore').style.display = 'none';
-  $('fileInput').value = '';
-  $('textInput').value = '';
-  $('filePreview').classList.remove('show');
-  $('btnGenerate').disabled = true;
-  clearSession();
   initProfileScreen();
   showScreen('profile');
 });
@@ -2998,6 +3292,7 @@ $('btnClearHistory').addEventListener('click', () => {
 $('btnReloadQuiz').addEventListener('click', () => {
   clearInterval(state._timerInterval);
   state._retryCount = state.questions.length;
+  state._skipSummary = true;
   state.questions = [];
   state.answers = [];
   state.score = 0;
@@ -3007,6 +3302,15 @@ $('btnReloadQuiz').addEventListener('click', () => {
 
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 $('btnQuitQuiz').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
+  // Save session so user can continue later
+  if (state.questions.length > 0) saveSession();
+  $('headerScore').style.display = 'none';
+  initProfileScreen();
+  showScreen('profile');
+});
+
+$('btnResetQuiz').addEventListener('click', () => {
   clearInterval(state._timerInterval);
   state.questions = [];
   state.answers = [];
@@ -3025,17 +3329,6 @@ $('btnQuitQuiz').addEventListener('click', () => {
   showScreen('profile');
 });
 
-$('btnResetQuiz').addEventListener('click', () => {
-  clearInterval(state._timerInterval);
-  state.current = 0;
-  state.answers = [];
-  state.score = 0;
-  saveSession();
-  $('headerScore').style.display = 'block';
-  renderQuestion();
-  updateHeaderScore();
-});
-
 // ─── "NIE WIEM" BUTTON ─────────────────────────────────────────────────────
 $('btnIdk').addEventListener('click', () => {
   const q = state.questions[state.current];
@@ -3048,6 +3341,7 @@ $('btnRetry').addEventListener('click', () => {
   // Preserve original settings for retry
   state._retryCount = state.questions.length;
   state._retryDifficulty = null; // use current DOM value
+  state._skipSummary = true;
   state.questions = [];
   state.answers = [];
   state.score = 0;
@@ -3236,6 +3530,164 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 });
 
 initTheme();
+
+// ─── PDF EXPORT ───────────────────────────────────────────────────────────────
+// ─── TOPIC SUMMARY ────────────────────────────────────────────────────────────
+function showTopicSummary() {
+  // If retrying (no fresh material), skip summary
+  if (!state.lastMaterial || state._skipSummary) {
+    state._skipSummary = false;
+    startQuiz();
+    return;
+  }
+
+  const material = state.lastMaterial;
+  // Extract a preview: first ~1000 chars, cut at sentence boundary
+  let preview = material.slice(0, 1200);
+  const lastDot = preview.lastIndexOf('.');
+  if (lastDot > 600) preview = preview.slice(0, lastDot + 1);
+  else if (preview.length > 1000) preview = preview.slice(0, 1000) + '...';
+
+  $('summaryTitle').textContent = 'Sciaga — ' + state.topic;
+  $('summaryContent').textContent = preview;
+  showScreen('summary');
+}
+
+$('btnStartAfterSummary').addEventListener('click', () => {
+  startQuiz();
+});
+
+// ─── FLASHCARDS ───────────────────────────────────────────────────────────────
+let fcDeck = [];
+let fcIndex = 0;
+
+function startFlashcards() {
+  // Build deck from wrong/IDK answers
+  fcDeck = state.answers
+    .filter(a => !a.isCorrect)
+    .map(a => {
+      const q = state.questions[a.questionId];
+      const correctOpt = q.options.find(o => o.id === a.correct);
+      return {
+        question: q.question,
+        correctAnswer: (a.correct + '. ' + (correctOpt ? correctOpt.text : '')),
+        explanation: q.explanation || '',
+        remember: q.remember || '',
+        trick: q.trick || ''
+      };
+    });
+
+  if (fcDeck.length === 0) return;
+  fcIndex = 0;
+
+  $('flashcardDone').style.display = 'none';
+  $('flashcardContainer').style.display = 'flex';
+  showScreen('flashcards');
+  renderFlashcard();
+}
+
+function renderFlashcard() {
+  if (fcDeck.length === 0) {
+    // All done
+    $('flashcardContainer').style.display = 'none';
+    $('flashcardDone').style.display = 'block';
+    return;
+  }
+
+  if (fcIndex >= fcDeck.length) fcIndex = 0;
+  const card = fcDeck[fcIndex];
+
+  $('flashcardCounter').textContent = 'Fiszka ' + (fcIndex + 1) + '/' + fcDeck.length;
+  $('fcQuestion').textContent = card.question;
+  $('fcCorrect').textContent = card.correctAnswer;
+  $('fcExplain').textContent = card.explanation;
+
+  if (card.remember) {
+    $('fcRemember').style.display = 'block';
+    $('fcRemember').textContent = 'Zapamietaj: ' + card.remember;
+  } else {
+    $('fcRemember').style.display = 'none';
+  }
+
+  if (card.trick) {
+    $('fcTrick').style.display = 'block';
+    $('fcTrick').textContent = 'Trick: ' + card.trick;
+  } else {
+    $('fcTrick').style.display = 'none';
+  }
+
+  // Reset flip
+  $('flashcard').classList.remove('flipped');
+}
+
+$('flashcard').addEventListener('click', () => {
+  $('flashcard').classList.toggle('flipped');
+});
+
+$('btnFcKnow').addEventListener('click', () => {
+  if (fcDeck.length === 0) return;
+  fcDeck.splice(fcIndex, 1);
+  if (fcIndex >= fcDeck.length) fcIndex = 0;
+  renderFlashcard();
+});
+
+$('btnFcRepeat').addEventListener('click', () => {
+  if (fcDeck.length === 0) return;
+  // Move current card to end of deck
+  const card = fcDeck.splice(fcIndex, 1)[0];
+  fcDeck.push(card);
+  if (fcIndex >= fcDeck.length) fcIndex = 0;
+  renderFlashcard();
+});
+
+$('btnFcBackToResults').addEventListener('click', () => {
+  showScreen('results');
+});
+
+$('btnFlashcards').addEventListener('click', () => {
+  startFlashcards();
+});
+
+// ─── KNOWLEDGE MAP ────────────────────────────────────────────────────────────
+function renderKnowledgeMap() {
+  if (!state.profile) return;
+  const history = profileGet('history', []);
+  const mapCard = $('knowledgeMapCard');
+  const mapEl = $('knowledgeMap');
+  mapEl.innerHTML = '';
+
+  if (history.length === 0) {
+    mapCard.style.display = 'none';
+    return;
+  }
+
+  // Group by topic, take best pct
+  const topicBest = {};
+  history.forEach(h => {
+    if (!topicBest[h.topic] || h.pct > topicBest[h.topic]) {
+      topicBest[h.topic] = h.pct;
+    }
+  });
+
+  const topics = Object.keys(topicBest);
+  if (topics.length === 0) {
+    mapCard.style.display = 'none';
+    return;
+  }
+
+  mapCard.style.display = 'block';
+  topics.forEach(topic => {
+    const pct = topicBest[topic];
+    let cls = 'km-badge-red';
+    if (pct >= 80) cls = 'km-badge-green';
+    else if (pct >= 50) cls = 'km-badge-yellow';
+
+    const badge = document.createElement('span');
+    badge.className = 'km-badge ' + cls;
+    badge.textContent = topic + ' ' + pct + '%';
+    mapEl.appendChild(badge);
+  });
+}
 
 // ─── PDF EXPORT ───────────────────────────────────────────────────────────────
 $('btnSavePdf').addEventListener('click', () => {
