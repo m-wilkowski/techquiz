@@ -66,8 +66,8 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
         { "id": "D", "text": "..." }
       ],
       "correct": "B",
-      "explanation": "Pomyślmy krok po kroku: [wyjaśnienie mechanizmu]. Dlatego odpowiedź B jest poprawna — [dlaczego]. Gdybyś wybrał A — to typowy błąd polegający na [opis błędu myślowego]. Opcja C jest błędna bo [wyjaśnienie]. Opcja D — [wyjaśnienie]. [Opcjonalnie: analogia z życia]. Minimum 5-8 zdań.",
-      "hint": "Naprowadzenie na tok rozumowania bez zdradzania odpowiedzi, np. 'Zastanów się jak działa parzystość — ile dysków minimum potrzeba żeby ją obliczyć?'"
+      "explanation": "Krótko: dlaczego B poprawne i dlaczego inne błędne. 3-4 zdania.",
+      "hint": "Krótka wskazówka."
     }
   ]
 }`;
@@ -89,7 +89,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       }
       messages = [{
         role: 'user',
-        content: `Na podstawie materiału wygeneruj dokładnie ${questionCount} pytań quizowych, poziom: ${difficultyMap[difficulty]}.\n\nMATERIAŁ:\n${material.slice(0, 14000)}\n\n${jsonInstruction}`
+        content: `Na podstawie materiału wygeneruj dokładnie ${questionCount} pytań quizowych, poziom: ${difficultyMap[difficulty]}.\n\nMATERIAŁ:\n${material.slice(0, 6000)}\n\n${jsonInstruction}`
       }];
     }
 
@@ -102,7 +102,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: Math.min(8000, questionCount * 350 + 1000),
+        max_tokens: 4096,
         system: systemPrompt,
         messages
       })
