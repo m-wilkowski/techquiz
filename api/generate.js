@@ -119,14 +119,29 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
 
     const data = await response.json();
     const raw = data.content?.[0]?.text || '';
-    const cleaned = raw.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+    console.log('Raw response length:', raw.length, 'snippet:', raw.slice(0, 300));
+
+    // Aggressive JSON extraction
+    let cleaned = raw.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+    // Try to find JSON object in response
+    const jsonStart = cleaned.indexOf('{');
+    const jsonEnd = cleaned.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleaned = cleaned.slice(jsonStart, jsonEnd + 1);
+    }
 
     let parsed;
     try {
       parsed = JSON.parse(cleaned);
     } catch(e) {
-      console.error('JSON parse fail. Raw snippet:', raw.slice(0, 400));
-      return res.status(500).json({ error: 'Błąd parsowania odpowiedzi AI. Spróbuj ponownie.' });
+      console.error('JSON parse fail. Raw snippet:', raw.slice(0, 500));
+      // Try to fix common issues - trailing commas, etc
+      try {
+        const fixed = cleaned.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+        parsed = JSON.parse(fixed);
+      } catch(e2) {
+        return res.status(500).json({ error: 'Błąd parsowania. Spróbuj ponownie (zmień liczbę pytań).' });
+      }
     }
 
     if (!parsed.questions?.length) {

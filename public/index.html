@@ -1663,8 +1663,7 @@ function saveSession() {
     score: state.score,
     hintsEnabled: state.hintsEnabled,
     lastMaterial: state.lastMaterial,
-    fileText: state.fileText === '__PDF__' ? '__PDF__' : (state.fileText || ''),
-    fileBase64: state.fileBase64 || null
+    fileText: state.fileText || ''
   });
 }
 
@@ -1841,12 +1840,48 @@ async function handleFile(file) {
   } else if (ext === 'pptx') {
     state.fileText = await extractPptxText(file);
   } else {
-    // PDF — send as base64 to API
-    state.fileText = '__PDF__';
-    state.fileBase64 = await toBase64(file);
+    // PDF — extract text client-side using pdf.js
+    state.fileText = await extractPdfText(file);
+    if (!state.fileText || state.fileText.length < 50) {
+      showError('Nie udało się wyciągnąć tekstu z PDF. Spróbuj wkleić tekst ręcznie.');
+      return;
+    }
   }
 
   checkGenerateButton();
+}
+
+async function extractPdfText(file) {
+  try {
+    const pdfjsLib = await loadPdfJs();
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let texts = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(item => item.str).join(' ').trim();
+      if (pageText) texts.push(pageText);
+    }
+    return texts.join('\n\n');
+  } catch(e) {
+    console.error('PDF parse error:', e);
+    return '';
+  }
+}
+
+function loadPdfJs() {
+  return new Promise((resolve, reject) => {
+    if (window.pdfjsLib) return resolve(window.pdfjsLib);
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      resolve(window.pdfjsLib);
+    };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
 }
 
 async function extractPptxText(file) {
@@ -1908,7 +1943,7 @@ function formatSize(bytes) {
 }
 
 function checkGenerateButton() {
-  const hasFile = state.file && (state.fileText || state.fileBase64);
+  const hasFile = state.file && state.fileText;
   const hasText = $('textInput').value.trim().length > 50;
   $('btnGenerate').disabled = !(hasFile || hasText);
 }
@@ -1918,11 +1953,9 @@ $('btnGenerate').addEventListener('click', generateQuiz);
 
 async function generateQuiz() {
   const textFromInput = $('textInput').value.trim();
-  const material = state.fileText !== '__PDF__'
-    ? (state.fileText || textFromInput)
-    : textFromInput;
+  const material = state.fileText || textFromInput;
 
-  if (!material && state.fileText !== '__PDF__') {
+  if (!material) {
     showError('Brak materiału. Wgraj plik lub wklej tekst.');
     return;
   }
@@ -1950,18 +1983,7 @@ async function generateQuiz() {
   }, 2000);
 
   try {
-    let body;
-
-    if (state.fileText === '__PDF__' && state.fileBase64) {
-      body = {
-        isPDF: true,
-        pdfBase64: state.fileBase64,
-        questionCount: count,
-        difficulty
-      };
-    } else {
-      body = { material, questionCount: count, difficulty };
-    }
+    const body = { material, questionCount: count, difficulty };
 
     const res = await fetch('/api/generate', {
       method: 'POST',
