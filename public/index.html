@@ -1608,6 +1608,24 @@ select:focus { border-color: var(--accent); }
 <div class="error-toast" id="errorToast"></div>
 
 <script>
+// ─── SUPABASE SYNC ───────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://cujkobpnjulgudxtvqeb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wNmyy3zhSOPxN0rrvrRLuw_RnTS8eas';
+
+function supaRest(path, options = {}) {
+  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || 'return=representation',
+      ...options.headers
+    },
+    method: options.method || 'GET',
+    body: options.body ? JSON.stringify(options.body) : undefined
+  }).then(r => r.ok ? r.json() : Promise.reject(r));
+}
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const state = {
   profile: null,        // 'dawid' or 'adrian'
@@ -1667,11 +1685,27 @@ function profileSet(key, val) {
   localStorage.setItem(getProfileKey(key), JSON.stringify(val));
 }
 
-function selectProfile(id) {
+async function selectProfile(id) {
   state.profile = id;
   const p = profiles[id];
   $('piAvatar').textContent = p.avatar;
   $('piName').textContent = p.name;
+
+  // Fetch remote data (fallback to localStorage)
+  try {
+    const [profileData] = await supaRest(`profiles?id=eq.${id}&select=stats,session`);
+    if (profileData) {
+      if (profileData.stats) profileSet('stats', profileData.stats);
+      if (profileData.session) profileSet('session', profileData.session);
+    }
+    const remoteHistory = await supaRest(`history?profile_id=eq.${id}&order=created_at.desc&limit=20`);
+    if (remoteHistory?.length) {
+      profileSet('history', remoteHistory.map(h => ({
+        topic: h.topic, questionCount: h.question_count,
+        score: h.score, pct: h.pct, date: h.date, time: h.time
+      })));
+    }
+  } catch(e) { console.warn('Sync fetch failed:', e); }
 
   // Restore session if exists
   const session = profileGet('session', null);
@@ -1714,7 +1748,7 @@ function selectProfile(id) {
 
 function saveSession() {
   if (!state.profile) return;
-  profileSet('session', {
+  const sessionData = {
     questions: state.questions,
     topic: state.topic,
     current: state.current,
@@ -1723,12 +1757,19 @@ function saveSession() {
     hintsEnabled: state.hintsEnabled,
     lastMaterial: state.lastMaterial,
     fileText: state.fileText || ''
-  });
+  };
+  profileSet('session', sessionData);
+  supaRest(`profiles?id=eq.${state.profile}`, {
+    method: 'PATCH', body: { session: sessionData, updated_at: new Date().toISOString() }
+  }).catch(() => {});
 }
 
 function clearSession() {
   if (!state.profile) return;
   profileSet('session', null);
+  supaRest(`profiles?id=eq.${state.profile}`, {
+    method: 'PATCH', body: { session: null, updated_at: new Date().toISOString() }
+  }).catch(() => {});
 }
 
 function addToHistory(topic, questionCount, score) {
@@ -1746,6 +1787,17 @@ function addToHistory(topic, questionCount, score) {
   // Keep last 20
   if (history.length > 20) history.length = 20;
   profileSet('history', history);
+  // Sync to cloud
+  const pct = Math.round((score / questionCount) * 100);
+  supaRest('history', {
+    method: 'POST',
+    body: {
+      profile_id: state.profile, topic, question_count: questionCount,
+      score, pct,
+      date: now.toLocaleDateString('pl-PL'),
+      time: now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
+    }
+  }).catch(() => {});
 }
 
 function renderHistory() {
@@ -1799,7 +1851,16 @@ $('profileIndicator').addEventListener('click', () => {
   showScreen('profile');
 });
 
-function initProfileScreen() {
+async function initProfileScreen() {
+  // Fetch remote stats
+  try {
+    const remoteProfiles = await supaRest('profiles?select=id,stats,session');
+    remoteProfiles.forEach(p => {
+      if (p.stats) localStorage.setItem(`tq_${p.id}_stats`, JSON.stringify(p.stats));
+      if (p.session) localStorage.setItem(`tq_${p.id}_session`, JSON.stringify(p.session));
+    });
+  } catch(e) { /* use local */ }
+
   Object.keys(profiles).forEach(id => {
     const stats = loadStatsFor(id);
     const meta = $('meta' + id.charAt(0).toUpperCase() + id.slice(1));
@@ -2461,6 +2522,9 @@ function loadStats() {
 function saveStats(stats) {
   if (!state.profile) return;
   localStorage.setItem(getProfileKey('stats'), JSON.stringify(stats));
+  supaRest(`profiles?id=eq.${state.profile}`, {
+    method: 'PATCH', body: { stats, updated_at: new Date().toISOString() }
+  }).catch(() => {});
 }
 
 function updateStatsDisplay() {
