@@ -2104,7 +2104,7 @@ async function generateQuiz() {
 
   try {
     // Split large quizzes into batches of max 10
-    const BATCH_SIZE = 10;
+    const BATCH_SIZE = 5;
     const batches = Math.ceil(count / BATCH_SIZE);
     let allQuestions = [];
     let topic = 'Quiz techniczny';
