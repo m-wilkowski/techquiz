@@ -100,7 +100,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
+        model: 'claude-3-haiku-20240307',
         max_tokens: Math.min(16000, questionCount * 500 + 2000),
         system: systemPrompt,
         messages
@@ -112,7 +112,8 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed ani po. Żadnych bac
       console.error('Anthropic error:', response.status, errText);
       if (response.status === 401) return res.status(502).json({ error: 'Nieprawidłowy klucz API. Sprawdź konfigurację.' });
       if (response.status === 429) return res.status(502).json({ error: 'Za dużo zapytań. Poczekaj chwilę i spróbuj ponownie.' });
-      return res.status(502).json({ error: 'Błąd komunikacji z AI. Spróbuj ponownie.' });
+      if (response.status === 404) return res.status(502).json({ error: 'Model AI niedostępny. Błąd: ' + errText.slice(0, 200) });
+      return res.status(502).json({ error: 'Błąd AI (' + response.status + '): ' + errText.slice(0, 200) });
     }
 
     const data = await response.json();
