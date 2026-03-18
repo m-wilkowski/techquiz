@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Brak klucza API.' });
 
-  const { material, questionCount = 5, difficulty = 'medium' } = req.body;
+  const { material, questionCount = 5, difficulty = 'medium', avoid = '' } = req.body;
   if (!material || material.trim().length < 50) return res.status(400).json({ error: 'Za mało materiału.' });
 
   const difficultyMap = {
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
         system: systemPrompt,
         messages: [{
           role: 'user',
-          content: `Wygeneruj ${questionCount} pytań, poziom: ${difficultyMap[difficulty]}.\n\nMATERIAŁ:\n${material.slice(0, 6000)}\n\n${jsonInstruction}`
+          content: `Wygeneruj ${questionCount} pytań, poziom: ${difficultyMap[difficulty]}.${avoid ? `\n\nNIE POWTARZAJ tych pytań (już były): ${avoid}` : ''}\n\nMATERIAŁ:\n${material.slice(0, 5000)}\n\n${jsonInstruction}`
         }]
       })
     });

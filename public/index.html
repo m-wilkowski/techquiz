@@ -2892,10 +2892,17 @@ async function generateQuiz() {
         ? `Generuję pytania (${b + 1}/${batches})...`
         : 'Generuję pytania...';
 
+      // Send existing questions to avoid duplicates
+      const existingQuestions = allQuestions.map(q => q.question).join('; ');
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ material: material.slice(0, 6000), questionCount: batchCount, difficulty })
+        body: JSON.stringify({
+          material: material.slice(0, 6000),
+          questionCount: batchCount,
+          difficulty,
+          avoid: existingQuestions ? existingQuestions.slice(0, 1000) : ''
+        })
       });
 
       if (!res.ok) {
@@ -2917,9 +2924,11 @@ async function generateQuiz() {
         throw new Error('Brak pytań w odpowiedzi.');
       }
 
-      // Renumber questions
-      data.questions.forEach((q, i) => { q.id = allQuestions.length + i + 1; });
-      allQuestions = allQuestions.concat(data.questions);
+      // Deduplicate and renumber
+      const existingTexts = new Set(allQuestions.map(q => q.question));
+      const newQs = data.questions.filter(q => !existingTexts.has(q.question));
+      newQs.forEach((q, i) => { q.id = allQuestions.length + i + 1; });
+      allQuestions = allQuestions.concat(newQs);
       if (data.topic) topic = data.topic;
     }
 
