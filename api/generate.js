@@ -45,7 +45,7 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych backtic
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 8192,
         system: systemPrompt,
         messages: [{
           role: 'user',
@@ -70,8 +70,29 @@ Odpowiedz WYŁĄCZNIE poprawnym JSON. Żadnego tekstu przed/po. Żadnych backtic
     let parsed;
     try { parsed = JSON.parse(cleaned); }
     catch(e) {
-      try { parsed = JSON.parse(cleaned.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']')); }
-      catch(e2) { return res.status(500).json({ error: 'Błąd parsowania.' }); }
+      // Try fixing trailing commas
+      let fixed = cleaned.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+      try { parsed = JSON.parse(fixed); }
+      catch(e2) {
+        // Try closing truncated JSON
+        // Count open brackets and close them
+        let attempt = fixed;
+        const openBraces = (attempt.match(/\{/g) || []).length;
+        const closeBraces = (attempt.match(/\}/g) || []).length;
+        const openBrackets = (attempt.match(/\[/g) || []).length;
+        const closeBrackets = (attempt.match(/\]/g) || []).length;
+        // Remove last incomplete property/object
+        attempt = attempt.replace(/,?\s*\{[^}]*$/, '');
+        attempt = attempt.replace(/,?\s*"[^"]*$/, '');
+        // Close remaining brackets
+        for (let i = 0; i < openBrackets - closeBrackets; i++) attempt += ']';
+        for (let i = 0; i < openBraces - closeBraces; i++) attempt += '}';
+        try { parsed = JSON.parse(attempt); }
+        catch(e3) {
+          console.error('Parse fail after repair:', raw.slice(-200));
+          return res.status(500).json({ error: 'Błąd parsowania.' });
+        }
+      }
     }
 
     if (!parsed.questions?.length) return res.status(500).json({ error: 'Brak pytań.' });
