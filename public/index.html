@@ -529,6 +529,13 @@ textarea::placeholder { color: var(--text3); }
 
 @media (max-width: 600px) {
   .settings-grid { grid-template-columns: 1fr; }
+  .results-stats { grid-template-columns: 1fr; gap: 8px; }
+  .streak-bar { padding: 6px 8px; gap: 4px; }
+  .streak-val { font-size: 12px; }
+  .streak-label { font-size: 9px; }
+  .quiz-topbar { flex-wrap: wrap; }
+  .quiz-topbar .progress-wrap { min-width: 100%; }
+  .q-text { font-size: 16px; }
 }
 
 .field label {
@@ -858,6 +865,7 @@ select:focus { border-color: var(--accent); }
   display: flex; align-items: center; gap: 10px;
   padding: 14px 18px;
   font-weight: 700; font-size: 15px;
+  border-radius: 10px 10px 0 0;
 }
 .feedback.is-correct .feedback-header {
   background: var(--correct-dim);
@@ -1011,6 +1019,7 @@ select:focus { border-color: var(--accent); }
   font-family: var(--mono); font-size: 36px;
   font-weight: 700; line-height: 1;
   position: relative; z-index: 1;
+  text-shadow: 0 0 20px rgba(0,212,255,0.3);
 }
 .score-denom {
   font-family: var(--mono); font-size: 12px;
@@ -2098,14 +2107,6 @@ function loadJSZip() {
   });
 }
 
-function toBase64(file) {
-  return new Promise((resolve) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result.split(',')[1]);
-    r.readAsDataURL(file);
-  });
-}
-
 function formatSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
@@ -2158,6 +2159,8 @@ async function generateQuiz() {
     const batches = Math.ceil(count / BATCH_SIZE);
     let allQuestions = [];
     let topic = 'Quiz techniczny';
+
+    if (batches > 1) clearInterval(msgInterval);
 
     for (let b = 0; b < batches; b++) {
       const batchCount = Math.min(BATCH_SIZE, count - b * BATCH_SIZE);
@@ -2398,7 +2401,8 @@ $('btnNext').addEventListener('click', () => {
 });
 
 function updateHeaderScore() {
-  $('headerScoreVal').textContent = `${state.score}/${state.questions.length}`;
+  const answered = state.answers.length;
+  $('headerScoreVal').textContent = `${state.score}/${answered || state.questions.length}`;
 }
 
 // ─── RESULTS ──────────────────────────────────────────────────────────────────
@@ -2521,6 +2525,7 @@ function showResults() {
 
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 $('btnQuitQuiz').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
   state.questions = [];
   state.answers = [];
   state.score = 0;
