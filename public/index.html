@@ -2993,14 +2993,6 @@ async function generateQuiz() {
   }, 2000);
 
   try {
-    // Fire summary generation in parallel (don't await yet)
-    const summaryPromise = state._skipSummary ? Promise.resolve(null) :
-      fetch('/api/summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ material: material.slice(0, 6000) })
-      }).then(r => r.ok ? r.json() : null).catch(() => null);
-
     // Split large quizzes into batches of max 10
     const BATCH_SIZE = 5;
     const batches = Math.ceil(count / BATCH_SIZE);
@@ -3056,8 +3048,22 @@ async function generateQuiz() {
       if (data.topic) topic = data.topic;
     }
 
-    // Await AI summary (started in parallel)
-    state._summaryData = await summaryPromise;
+    // Generate AI summary after quiz questions are ready
+    if (!state._skipSummary) {
+      $('loadingText').textContent = 'Przygotowuję ściągę...';
+      try {
+        const summaryRes = await fetch('/api/summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ material: material.slice(0, 6000) })
+        });
+        state._summaryData = summaryRes.ok ? await summaryRes.json() : null;
+      } catch(_) {
+        state._summaryData = null;
+      }
+    } else {
+      state._summaryData = null;
+    }
 
     state.questions = allQuestions;
     state.topic = topic;
