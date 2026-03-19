@@ -1,0 +1,24 @@
+{
+  "name": "TechQuiz — Nauka przez rozumienie",
+  "short_name": "TechQuiz",
+  "description": "Quiz techniczny dla uczniów IT technikum",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080c14",
+  "theme_color": "#00d4ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/toperz.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/toperz.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

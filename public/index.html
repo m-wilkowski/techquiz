@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TechQuiz — Nauka przez rozumienie | CYRBER</title>
 <link rel="icon" type="image/png" href="/favicon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00d4ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TechQuiz">
+<link rel="apple-touch-icon" href="/toperz.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
@@ -541,6 +547,55 @@ textarea {
 textarea:focus { border-color: var(--accent); }
 textarea::placeholder { color: var(--text3); }
 
+/* MATERIAL LIBRARY */
+.material-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+.material-item:hover { border-color: var(--accent); background: var(--accent-dim); }
+.material-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+.material-score { font-family: var(--mono); font-size: 12px; font-weight: 700; margin-left: auto; flex-shrink: 0; }
+.material-delete {
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  font-size: 14px; padding: 4px; border-radius: 4px; transition: color 0.15s; flex-shrink: 0;
+}
+.material-delete:hover { color: var(--wrong); }
+
+/* DIFFICULTY BANNER */
+.difficulty-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; border-radius: 12px; margin-top: 16px;
+  font-size: 14px; font-weight: 600;
+}
+.difficulty-banner-up { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--correct); }
+.difficulty-banner-down { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: var(--warn); }
+
+/* EXAM TIMER */
+.exam-timer {
+  font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--accent);
+  padding: 4px 12px; border: 1px solid var(--accent); border-radius: 8px;
+}
+.exam-timer-warn { color: var(--warn) !important; border-color: var(--warn) !important; animation: timerPulse 0.5s ease-in-out infinite; }
+.exam-timer-danger { color: var(--wrong) !important; border-color: var(--wrong) !important; animation: timerPulse 0.3s ease-in-out infinite; }
+@keyframes timerPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* SPARKLINE */
+.sparkline-card { padding: 14px 18px; }
+.sparkline-wrap svg { width: 100%; height: 60px; }
+.sparkline-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sparkline-area { fill: var(--accent-dim); stroke: none; }
+.sparkline-dot { fill: var(--accent); }
+.sparkline-labels { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 4px; }
+
 /* MOTIVATION BANNER */
 .motivation-banner {
   display: flex;
@@ -561,7 +616,7 @@ textarea::placeholder { color: var(--text3); }
 /* SETTINGS */
 .settings-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
@@ -2255,6 +2310,28 @@ select:focus { border-color: var(--accent); }
             <option value="no">Wyłączone</option>
           </select>
         </div>
+        <div class="field">
+          <label>Tryb egzaminacyjny</label>
+          <select id="examMode">
+            <option value="off" selected>Wyłączony</option>
+            <option value="30">30s na pytanie</option>
+            <option value="60">60s na pytanie</option>
+            <option value="90">90s na pytanie</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="sparkline-card card" id="sparklineCard" style="display:none">
+      <div class="card-label">Postępy — ostatnie quizy</div>
+      <div class="sparkline-wrap" id="sparklineWrap"></div>
+    </div>
+
+    <div class="card" id="materialsCard" style="display:none">
+      <div class="card-label">Biblioteka materiałów</div>
+      <div id="materialsList"></div>
+      <div class="history-footer">
+        <span class="history-count" id="materialsCount"></span>
       </div>
     </div>
 
@@ -2414,6 +2491,11 @@ select:focus { border-color: var(--accent); }
             <div class="stat-label">Skuteczność</div>
           </div>
         </div>
+
+        <div class="difficulty-banner" id="difficultyBanner" style="display:none">
+          <span id="diffBannerIcon"></span>
+          <span id="diffBannerText"></span>
+        </div>
       </div>
     </div>
 
@@ -2442,6 +2524,9 @@ select:focus { border-color: var(--accent); }
       </button>
       <button class="btn btn-ghost" id="btnSavePdf">
         🖨️ Zapisz PDF
+      </button>
+      <button class="btn btn-ghost" id="btnShareResults">
+        📤 Udostępnij wyniki
       </button>
       <button class="btn btn-primary" id="btnRetry">
         🔄 Nowe pytania z tego materiału
@@ -2574,6 +2659,8 @@ async function selectProfile(id) {
 
   updateStatsDisplay();
   renderHistory();
+  renderMaterials();
+  renderSparkline();
   updateMotivation();
   showScreen('upload');
 }
@@ -2973,6 +3060,9 @@ async function generateQuiz() {
 
   state.lastMaterial = material;
   state.hintsEnabled = $('hintsEnabled').value === 'yes';
+  const examVal = $('examMode').value;
+  state.examMode = examVal !== 'off';
+  state.examTimeLimit = state.examMode ? parseInt(examVal) : 0;
 
   const count = state._retryCount || parseInt($('questionCount').value);
   const difficulty = state._retryDifficulty || $('difficulty').value;
@@ -3135,14 +3225,20 @@ function renderQuestion() {
     list.appendChild(btn);
   });
 
-  // Hint
-  if (state.hintsEnabled && q.hint) {
-    $('hintWrap').style.display = 'block';
-    $('hintText').textContent = '💡 ' + q.hint;
-    $('hintText').classList.remove('show');
-    $('btnHint').textContent = '💡 Pokaż wskazówkę';
-  } else {
+  // Hint & IDK — hide in exam mode
+  if (state.examMode) {
     $('hintWrap').style.display = 'none';
+    $('btnIdk').style.display = 'none';
+  } else {
+    $('btnIdk').style.display = '';
+    if (state.hintsEnabled && q.hint) {
+      $('hintWrap').style.display = 'block';
+      $('hintText').textContent = '💡 ' + q.hint;
+      $('hintText').classList.remove('show');
+      $('btnHint').textContent = '💡 Pokaż wskazówkę';
+    } else {
+      $('hintWrap').style.display = 'none';
+    }
   }
 
   // Feedback & IDK reset
@@ -3158,11 +3254,48 @@ function renderQuestion() {
   // Timer
   state._questionStart = Date.now();
   clearInterval(state._timerInterval);
-  $('qTimer').textContent = '0s';
-  state._timerInterval = setInterval(() => {
-    const elapsed = Math.round((Date.now() - state._questionStart) / 1000);
-    $('qTimer').textContent = elapsed + 's';
-  }, 1000);
+
+  if (state.examMode && state.examTimeLimit > 0) {
+    const timeLimit = state.examTimeLimit;
+    const timerEl = $('qTimer');
+    timerEl.className = 'q-timer exam-timer';
+    timerEl.textContent = timeLimit + 's';
+    state._timerInterval = setInterval(() => {
+      const elapsed = Math.round((Date.now() - state._questionStart) / 1000);
+      const remaining = Math.max(0, timeLimit - elapsed);
+      timerEl.textContent = remaining + 's';
+      timerEl.classList.remove('exam-timer-warn', 'exam-timer-danger');
+      if (remaining <= 5) timerEl.classList.add('exam-timer-danger');
+      else if (remaining <= 10) timerEl.classList.add('exam-timer-warn');
+      if (remaining <= 0) {
+        clearInterval(state._timerInterval);
+        examTimeOut();
+      }
+    }, 200);
+  } else {
+    $('qTimer').className = 'q-timer';
+    $('qTimer').textContent = '0s';
+    state._timerInterval = setInterval(() => {
+      const elapsed = Math.round((Date.now() - state._questionStart) / 1000);
+      $('qTimer').textContent = elapsed + 's';
+    }, 1000);
+  }
+}
+
+function examTimeOut() {
+  const q = state.questions[state.current];
+  state.answers.push({
+    questionId: state.current, chosen: 'TIMEOUT', correct: q.correct,
+    isCorrect: false, usedIdk: false
+  });
+  const opts = $('optionsList').querySelectorAll('.option');
+  opts.forEach(o => { o.classList.add('locked', 'dimmed'); });
+  $('qTimer').textContent = '⏰';
+  saveSession();
+  setTimeout(() => {
+    if (state.current < state.questions.length - 1) { state.current++; renderQuestion(); }
+    else { showResults(); }
+  }, 600);
 }
 
 function selectAnswer(chosenId) {
@@ -3198,6 +3331,17 @@ function selectAnswer(chosenId) {
       o.classList.add('dimmed');
     }
   });
+
+  // Exam mode — skip feedback, auto-advance
+  if (state.examMode) {
+    clearInterval(state._timerInterval);
+    saveSession();
+    setTimeout(() => {
+      if (state.current < state.questions.length - 1) { state.current++; renderQuestion(); }
+      else { showResults(); }
+    }, 400);
+    return;
+  }
 
   // Feedback
   const fb = $('feedbackPanel');
@@ -3335,6 +3479,35 @@ function showResults() {
   $('statCorrect').textContent = correct;
   $('statWrong').textContent = wrong;
   $('statPct').textContent = pct + '%';
+
+  // Adaptive difficulty
+  const diffBanner = $('difficultyBanner');
+  const currentDiff = $('difficulty').value;
+  diffBanner.style.display = 'none';
+  diffBanner.classList.remove('difficulty-banner-up', 'difficulty-banner-down');
+  if (pct >= 90 && currentDiff !== 'hard') {
+    const nextDiff = currentDiff === 'easy' ? 'medium' : 'hard';
+    const nextLabel = nextDiff === 'medium' ? 'Rozumienie' : 'Analiza';
+    diffBanner.style.display = 'flex';
+    diffBanner.classList.add('difficulty-banner-up');
+    $('diffBannerIcon').textContent = '🚀';
+    $('diffBannerText').textContent = `Świetny wynik! Spróbuj: ${nextLabel}`;
+    $('difficulty').value = nextDiff;
+  } else if (pct < 50 && currentDiff !== 'easy') {
+    const nextDiff = currentDiff === 'hard' ? 'medium' : 'easy';
+    const nextLabel = nextDiff === 'medium' ? 'Rozumienie' : 'Podstawy';
+    diffBanner.style.display = 'flex';
+    diffBanner.classList.add('difficulty-banner-down');
+    $('diffBannerIcon').textContent = '📖';
+    $('diffBannerText').textContent = `Spróbuj łatwiejszy poziom: ${nextLabel}`;
+    $('difficulty').value = nextDiff;
+  }
+
+  // Save material to library
+  if (state.lastMaterial) {
+    saveMaterial(state.topic, state.lastMaterial);
+    updateMaterialScore(state.topic, pct);
+  }
 
   // Record to stats and history
   recordQuizResult(pct);
@@ -3983,6 +4156,153 @@ $('btnSavePdf').addEventListener('click', () => {
 
   window.print();
 });
+
+// ─── MATERIAL LIBRARY ────────────────────────────────────────────────────────
+function getMaterials() { return profileGet('materials', []); }
+
+function saveMaterial(topic, material) {
+  if (!state.profile) return;
+  const materials = getMaterials();
+  const existing = materials.find(m => m.topic === topic);
+  if (existing) {
+    existing.material = material.slice(0, 6000);
+    existing.lastQuizDate = new Date().toISOString();
+  } else {
+    materials.unshift({
+      id: Date.now().toString(36),
+      topic,
+      material: material.slice(0, 6000),
+      lastQuizPct: null,
+      lastQuizDate: new Date().toISOString()
+    });
+    if (materials.length > 10) materials.length = 10;
+  }
+  profileSet('materials', materials);
+}
+
+function updateMaterialScore(topic, pct) {
+  if (!state.profile) return;
+  const materials = getMaterials();
+  const m = materials.find(m => m.topic === topic);
+  if (m) { m.lastQuizPct = pct; m.lastQuizDate = new Date().toISOString(); profileSet('materials', materials); }
+}
+
+function renderMaterials() {
+  if (!state.profile) return;
+  const materials = getMaterials();
+  const card = $('materialsCard');
+  const list = $('materialsList');
+  list.innerHTML = '';
+  if (materials.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  materials.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'material-item';
+    const dateStr = m.lastQuizDate ? new Date(m.lastQuizDate).toLocaleDateString('pl-PL') : '';
+    const scoreStr = m.lastQuizPct != null ? m.lastQuizPct + '%' : '—';
+    const color = m.lastQuizPct >= 70 ? 'var(--correct)' : m.lastQuizPct >= 50 ? 'var(--warn)' : m.lastQuizPct != null ? 'var(--wrong)' : 'var(--text3)';
+    item.innerHTML = `
+      <span class="history-icon">📘</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.topic)}</div>
+        <div class="material-meta">${dateStr}</div>
+      </div>
+      <span class="material-score" style="color:${color}">${scoreStr}</span>
+      <button class="material-delete" data-mid="${m.id}" title="Usuń">✕</button>
+    `;
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.material-delete')) return;
+      state.fileText = m.material;
+      state.lastMaterial = m.material;
+      $('textInput').value = m.material.slice(0, 2000);
+      checkGenerateButton();
+      $('btnGenerate').scrollIntoView({ behavior: 'smooth' });
+    });
+    item.querySelector('.material-delete').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const mats = getMaterials().filter(x => x.id !== m.id);
+      profileSet('materials', mats);
+      renderMaterials();
+    });
+    list.appendChild(item);
+  });
+  $('materialsCount').textContent = `${materials.length} / 10 materiałów`;
+}
+
+// ─── SPARKLINE ───────────────────────────────────────────────────────────────
+function renderSparkline() {
+  if (!state.profile) return;
+  const history = profileGet('history', []);
+  const card = $('sparklineCard');
+  const wrap = $('sparklineWrap');
+  wrap.innerHTML = '';
+  if (history.length < 2) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const data = history.slice(0, 10).reverse();
+  const scores = data.map(h => h.pct);
+  const n = scores.length;
+  const w = 280, h = 60, pad = 8;
+  const innerW = w - pad * 2, innerH = h - pad * 2;
+  const mn = Math.min(...scores, 0), mx = Math.max(...scores, 100);
+  const range = mx - mn || 1;
+  const pts = scores.map((s, i) => ({
+    x: pad + (i / (n - 1)) * innerW,
+    y: pad + innerH - ((s - mn) / range) * innerH,
+    s
+  }));
+  const poly = pts.map(p => `${p.x},${p.y}`).join(' ');
+  const area = `M${pts[0].x},${h} L${poly} L${pts[n-1].x},${h} Z`;
+  let svg = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`;
+  svg += `<path class="sparkline-area" d="${area}"/>`;
+  svg += `<polyline class="sparkline-line" points="${poly}"/>`;
+  pts.forEach((p, i) => {
+    const r = i === n - 1 ? 4 : 2.5;
+    svg += `<circle class="sparkline-dot" cx="${p.x}" cy="${p.y}" r="${r}"/>`;
+  });
+  svg += `</svg>`;
+  svg += `<div class="sparkline-labels"><span>${data[0].date || ''}</span><span>Ostatni: ${data[n-1].pct}%</span></div>`;
+  wrap.innerHTML = svg;
+}
+
+// ─── SHARE RESULTS ───────────────────────────────────────────────────────────
+$('btnShareResults').addEventListener('click', async () => {
+  const total = state.questions.length;
+  const correct = state.score;
+  const pct = Math.round((correct / total) * 100);
+  const profileName = state.profile ? profiles[state.profile].name : '';
+  const wrongAnswers = state.answers.filter(a => !a.isCorrect);
+  const weakAreas = wrongAnswers.slice(0, 3).map(a => {
+    const q = state.questions[a.questionId];
+    return '  - ' + q.question.slice(0, 60);
+  }).join('\n');
+
+  let text = `📊 TechQuiz — Wyniki\n👤 ${profileName}\n📚 ${state.topic}\n✅ Wynik: ${correct}/${total} (${pct}%)`;
+  if (weakAreas) text += `\n\n⚠️ Do powtórki:\n${weakAreas}`;
+  text += `\n\n🔗 techquiz-app.vercel.app`;
+
+  if (navigator.share) {
+    try { await navigator.share({ title: 'TechQuiz — Wyniki', text }); }
+    catch(e) { if (e.name !== 'AbortError') copyResultsToClipboard(text); }
+  } else {
+    copyResultsToClipboard(text);
+  }
+});
+
+function copyResultsToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = $('btnShareResults');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Skopiowano!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  }).catch(() => showError('Nie udało się skopiować.'));
+}
+
+// ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.warn('SW:', err));
+  });
+}
 </script>
 </body>
 </html>
