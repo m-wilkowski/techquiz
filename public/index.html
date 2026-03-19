@@ -2431,6 +2431,9 @@ select:focus { border-color: var(--accent); }
       <button class="btn btn-ghost" id="btnNewMaterial">
         📂 Nowy materiał
       </button>
+      <button class="btn btn-ghost" id="btnRestartSame">
+        ↺ Od początku (te same pytania)
+      </button>
       <button class="btn btn-ghost" id="btnRetryWrong" style="display:none">
         🎯 Powtórz tylko błędne
       </button>
@@ -3078,18 +3081,12 @@ async function generateQuiz() {
       state._summaryData = null;
     }
 
-    // Shuffle questions so order is always different
-    for (let i = allQuestions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
-    }
-    allQuestions.forEach((q, i) => { q.id = i + 1; });
-
     state.questions = allQuestions;
     state.topic = topic;
     state.current = 0;
     state.answers = [];
     state.score = 0;
+    shuffleQuiz();
 
     clearInterval(msgInterval);
     hideLoading();
@@ -3509,12 +3506,8 @@ $('btnReloadQuiz').addEventListener('click', () => {
 // ─── QUIZ CONTROL BUTTONS ───────────────────────────────────────────────────
 $('btnQuitQuiz').addEventListener('click', () => {
   clearInterval(state._timerInterval);
-  // Clear session — user explicitly quits
-  clearSession();
-  state.questions = [];
-  state.answers = [];
-  state.score = 0;
-  state.current = 0;
+  // Save progress and go back to upload — material stays loaded
+  if (state.questions.length > 0) saveSession();
   $('headerScore').style.display = 'none';
   renderHistory();
   showScreen('upload');
@@ -3522,15 +3515,14 @@ $('btnQuitQuiz').addEventListener('click', () => {
 
 $('btnResetQuiz').addEventListener('click', () => {
   clearInterval(state._timerInterval);
-  // Keep material loaded but restart quiz from scratch
-  state.questions = [];
+  shuffleQuiz();
   state.answers = [];
   state.score = 0;
   state.current = 0;
-  $('headerScore').style.display = 'none';
-  clearSession();
-  renderHistory();
-  showScreen('upload');
+  $('headerScore').style.display = 'block';
+  saveSession();
+  showScreen('quiz');
+  renderQuestion();
 });
 
 // ─── "NIE WIEM" BUTTON ─────────────────────────────────────────────────────
@@ -3553,6 +3545,35 @@ $('btnRetry').addEventListener('click', () => {
   state.current = 0;
   $('btnGenerate').disabled = true;
   generateQuiz();
+});
+
+function shuffleQuiz() {
+  for (let i = state.questions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [state.questions[i], state.questions[j]] = [state.questions[j], state.questions[i]];
+  }
+  state.questions.forEach((q, idx) => {
+    q.id = idx + 1;
+    const correctText = q.options.find(o => o.id === q.correct)?.text;
+    for (let i = q.options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+    }
+    q.options.forEach((o, i) => { o.id = ['A','B','C','D'][i]; });
+    const nc = q.options.find(o => o.text === correctText);
+    if (nc) q.correct = nc.id;
+  });
+}
+
+$('btnRestartSame').addEventListener('click', () => {
+  shuffleQuiz();
+  state.answers = [];
+  state.score = 0;
+  state.current = 0;
+  $('headerScore').style.display = 'block';
+  saveSession();
+  showScreen('quiz');
+  renderQuestion();
 });
 
 $('btnRetryWrong').addEventListener('click', async () => {
