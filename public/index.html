@@ -3004,7 +3004,7 @@ async function generateQuiz() {
     let allQuestions = [];
     let topic = 'Quiz techniczny';
 
-    if (batches > 1) clearInterval(msgInterval);
+    clearInterval(msgInterval);
 
     for (let b = 0; b < batches; b++) {
       const batchCount = Math.min(BATCH_SIZE, count - b * BATCH_SIZE);
@@ -3048,17 +3048,8 @@ async function generateQuiz() {
       // Deduplicate and renumber
       const existingTexts = new Set(allQuestions.map(q => q.question));
       const newQs = data.questions.filter(q => !existingTexts.has(q.question));
-      // Shuffle options within each question so correct answer isn't always in same position
-      newQs.forEach(q => {
-        const correctText = q.options.find(o => o.id === q.correct)?.text;
-        for (let i = q.options.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
-        }
-        q.options.forEach((o, idx) => { o.id = ['A','B','C','D'][idx]; });
-        const newCorrect = q.options.find(o => o.text === correctText);
-        if (newCorrect) q.correct = newCorrect.id;
-      });
+      // Shuffle options within each question
+      newQs.forEach(q => shuffleOptions(q));
       newQs.forEach((q, i) => { q.id = allQuestions.length + i + 1; });
       allQuestions = allQuestions.concat(newQs);
       if (data.topic) topic = data.topic;
@@ -3081,6 +3072,8 @@ async function generateQuiz() {
       state._summaryData = null;
     }
 
+    if (allQuestions.length === 0) throw new Error('Nie udało się wygenerować pytań. Spróbuj ponownie.');
+
     state.questions = allQuestions;
     state.topic = topic;
     state.current = 0;
@@ -3090,6 +3083,9 @@ async function generateQuiz() {
 
     clearInterval(msgInterval);
     hideLoading();
+    if (allQuestions.length < count) {
+      showError(`Wygenerowano ${allQuestions.length} z ${count} pytań — część nie doszła.`);
+    }
     showTopicSummary();
 
   } catch(e) {
@@ -3547,21 +3543,31 @@ $('btnRetry').addEventListener('click', () => {
   generateQuiz();
 });
 
+function shuffleOptions(q) {
+  // Tag correct option before shuffle
+  q.options.forEach(o => { o._isCorrect = (o.id === q.correct); });
+  // Fisher-Yates shuffle
+  for (let i = q.options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+  }
+  // Reassign IDs and find correct
+  q.options.forEach((o, i) => {
+    o.id = ['A','B','C','D'][i];
+    if (o._isCorrect) q.correct = o.id;
+    delete o._isCorrect;
+  });
+}
+
 function shuffleQuiz() {
+  // Shuffle question order
   for (let i = state.questions.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [state.questions[i], state.questions[j]] = [state.questions[j], state.questions[i]];
   }
   state.questions.forEach((q, idx) => {
     q.id = idx + 1;
-    const correctText = q.options.find(o => o.id === q.correct)?.text;
-    for (let i = q.options.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
-    }
-    q.options.forEach((o, i) => { o.id = ['A','B','C','D'][i]; });
-    const nc = q.options.find(o => o.text === correctText);
-    if (nc) q.correct = nc.id;
+    shuffleOptions(q);
   });
 }
 
