@@ -541,6 +541,23 @@ textarea {
 textarea:focus { border-color: var(--accent); }
 textarea::placeholder { color: var(--text3); }
 
+/* MOTIVATION BANNER */
+.motivation-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.motivation-icon { font-size: 20px; flex-shrink: 0; }
+.motivation-text { line-height: 1.4; }
+
 /* SETTINGS */
 .settings-grid {
   display: grid;
@@ -556,7 +573,7 @@ textarea::placeholder { color: var(--text3); }
   .results-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .streak-bar { padding: 6px 8px; gap: 4px; }
   .streak-val { font-size: 12px; }
-  .streak-label { font-size: 9px; }
+  .streak-label { font-size: 11px; }
   .quiz-topbar { flex-wrap: wrap; }
   .quiz-topbar .progress-wrap { min-width: 100%; order: -1; }
   .q-text { font-size: 16px; }
@@ -714,18 +731,18 @@ textarea::placeholder { color: var(--text3); }
   .file-type-badge { font-size: 10px; padding: 2px 8px; }
   textarea { font-size: 12px; min-height: 80px; padding: 10px; line-height: 1.6; }
   .divider { margin: 10px 0; font-size: 10px; }
-  .card-label { font-size: 9px; letter-spacing: 1.5px; margin-bottom: 10px; }
+  .card-label { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 10px; }
   select { font-size: 13px; padding: 10px; }
 
   /* Quiz topbar — buttons wrap above progress */
   .quiz-topbar { gap: 6px; margin-bottom: 6px; }
-  .btn-topbar { font-size: 9px; padding: 5px 6px; border-radius: 5px; min-height: 30px; }
+  .btn-topbar { font-size: 11px; padding: 5px 6px; border-radius: 5px; min-height: 30px; }
 
   /* Question — fit on screen before answer */
   .card { padding: 12px; margin-bottom: 8px; }
   .q-header { margin-bottom: 2px; }
   .q-text { font-size: 15px; margin-bottom: 10px; line-height: 1.35; letter-spacing: -0.2px; }
-  .topic-tag { font-size: 9px; padding: 2px 6px; max-width: 120px; }
+  .topic-tag { font-size: 11px; padding: 2px 6px; max-width: 120px; }
 
   /* Options — compact but tappable */
   .options { gap: 5px; }
@@ -787,7 +804,7 @@ textarea::placeholder { color: var(--text3); }
   /* History */
   .history-item { padding: 7px 10px; font-size: 11px; gap: 8px; }
   .history-score { font-size: 11px; }
-  .history-detail { font-size: 9px; }
+  .history-detail { font-size: 11px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -824,12 +841,12 @@ textarea::placeholder { color: var(--text3); }
   .card { padding: 10px; margin-bottom: 6px; border-radius: 10px; }
   .q-text { font-size: 14px; margin-bottom: 8px; }
   .q-header { gap: 4px; }
-  .topic-tag { font-size: 8px; padding: 1px 5px; max-width: 100px; }
-  .q-badge { font-size: 9px; }
+  .topic-tag { font-size: 11px; padding: 1px 5px; max-width: 100px; }
+  .q-badge { font-size: 11px; }
 
   .options { gap: 4px; }
   .option { padding: 9px 10px; gap: 7px; border-radius: 8px; }
-  .option-key { width: 24px; height: 24px; font-size: 9px; border-radius: 6px; }
+  .option-key { width: 24px; height: 24px; font-size: 11px; border-radius: 6px; }
   .option-text { font-size: 12px; line-height: 1.3; }
 
   /* Quiz tools */
@@ -838,8 +855,8 @@ textarea::placeholder { color: var(--text3); }
   .btn-idk { font-size: 10px; padding: 7px 10px; }
 
   /* Feedback */
-  .feedback-body { max-height: 120px; font-size: 10px; }
-  .learn-box { font-size: 10px; padding: 6px 8px; }
+  .feedback-body { max-height: 120px; font-size: 11px; }
+  .learn-box { font-size: 11px; padding: 6px 8px; }
 
   .btn-next { padding: 11px; font-size: 13px; }
 
@@ -849,7 +866,7 @@ textarea::placeholder { color: var(--text3); }
   .results-title { font-size: 18px; }
   .stat-box { padding: 8px 4px; }
   .stat-val { font-size: 16px; }
-  .stat-label { font-size: 9px; }
+  .stat-label { font-size: 11px; }
   .results-actions .btn { font-size: 11px; padding: 9px 8px; }
 
   /* Upload */
@@ -860,7 +877,7 @@ textarea::placeholder { color: var(--text3); }
   select { font-size: 12px; padding: 9px; }
 
   /* Topbar buttons — icon only feel */
-  .btn-topbar { font-size: 8px; padding: 4px 5px; }
+  .btn-topbar { font-size: 11px; padding: 4px 5px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1679,6 +1696,12 @@ select:focus { border-color: var(--accent); }
   color: var(--accent2);
 }
 
+.fc-extra-reallife {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.25);
+  color: var(--correct);
+}
+
 .flashcard-actions {
   display: flex;
   gap: 12px;
@@ -2169,6 +2192,11 @@ select:focus { border-color: var(--accent); }
   <!-- SCREEN: UPLOAD -->
   <div class="screen" id="screenUpload">
 
+    <div class="motivation-banner" id="motivationBanner" style="display:none">
+      <span class="motivation-icon" id="motivationIcon"></span>
+      <span class="motivation-text" id="motivationText"></span>
+    </div>
+
     <div class="card">
       <div class="card-label">Materiał do nauki</div>
 
@@ -2333,6 +2361,7 @@ select:focus { border-color: var(--accent); }
             <div class="fc-explain" id="fcExplain"></div>
             <div class="fc-extra fc-extra-remember" id="fcRemember" style="display:none"></div>
             <div class="fc-extra fc-extra-trick" id="fcTrick" style="display:none"></div>
+            <div class="fc-extra fc-extra-reallife" id="fcRealLife" style="display:none"></div>
           </div>
         </div>
       </div>
@@ -2542,6 +2571,7 @@ async function selectProfile(id) {
 
   updateStatsDisplay();
   renderHistory();
+  updateMotivation();
   showScreen('upload');
 }
 
@@ -2944,8 +2974,10 @@ async function generateQuiz() {
 
   const count = state._retryCount || parseInt($('questionCount').value);
   const difficulty = state._retryDifficulty || $('difficulty').value;
+  const focusTopics = state._retryFocusTopics || '';
   state._retryCount = null;
   state._retryDifficulty = null;
+  state._retryFocusTopics = null;
 
   $('btnGenerate').disabled = true;
   showLoading('Analizuję materiał...');
@@ -2962,6 +2994,14 @@ async function generateQuiz() {
   }, 2000);
 
   try {
+    // Fire summary generation in parallel (don't await yet)
+    const summaryPromise = state._skipSummary ? Promise.resolve(null) :
+      fetch('/api/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ material: material.slice(0, 6000) })
+      }).then(r => r.ok ? r.json() : null).catch(() => null);
+
     // Split large quizzes into batches of max 10
     const BATCH_SIZE = 5;
     const batches = Math.ceil(count / BATCH_SIZE);
@@ -2985,7 +3025,8 @@ async function generateQuiz() {
           material: material.slice(0, 6000),
           questionCount: batchCount,
           difficulty,
-          avoid: existingQuestions ? existingQuestions.slice(0, 1000) : ''
+          avoid: existingQuestions ? existingQuestions.slice(0, 1000) : '',
+          focus: focusTopics ? focusTopics.slice(0, 1000) : ''
         })
       });
 
@@ -3015,6 +3056,9 @@ async function generateQuiz() {
       allQuestions = allQuestions.concat(newQs);
       if (data.topic) topic = data.topic;
     }
+
+    // Await AI summary (started in parallel)
+    state._summaryData = await summaryPromise;
 
     state.questions = allQuestions;
     state.topic = topic;
@@ -3484,20 +3528,24 @@ $('btnRetry').addEventListener('click', () => {
   generateQuiz();
 });
 
-$('btnRetryWrong').addEventListener('click', () => {
-  // Replay only wrong questions (reshuffled)
+$('btnRetryWrong').addEventListener('click', async () => {
+  // Regenerate NEW questions focused on weak topics
   const wrongQs = state.answers
     .filter(a => !a.isCorrect)
     .map(a => state.questions[a.questionId]);
   if (wrongQs.length === 0) return;
-  state.questions = wrongQs.sort(() => Math.random() - 0.5);
-  state.current = 0;
+
+  const wrongTopics = wrongQs.map(q => q.question).join('\n');
+  state._retryCount = Math.min(wrongQs.length, 10);
+  state._retryDifficulty = null;
+  state._skipSummary = true;
+  state._retryFocusTopics = wrongTopics;
+  state.questions = [];
   state.answers = [];
   state.score = 0;
+  state.current = 0;
   $('headerScore').style.display = 'block';
-  saveSession();
-  showScreen('quiz');
-  renderQuestion();
+  generateQuiz();
 });
 
 $('btnNewMaterial').addEventListener('click', () => {
@@ -3530,6 +3578,34 @@ function esc(str) {
 function loadStats() {
   if (!state.profile) return { quizzes: 0, scores: [], streak: 0, lastDate: null, best: 0 };
   return loadStatsFor(state.profile);
+}
+
+function updateMotivation() {
+  const stats = loadStats();
+  const banner = $('motivationBanner');
+  const messages = [];
+  if (stats.streak >= 2) {
+    messages.push({ i: '🔥', t: `${stats.streak} dni z rzędu! Nie przerywaj serii!` });
+  }
+  if (stats.best > 0) {
+    messages.push({ i: '🏆', t: `Twój rekord: ${stats.best}% — dasz radę go pobić!` });
+  }
+  if (stats.quizzes >= 5) {
+    messages.push({ i: '📝', t: `Już ${stats.quizzes} quizów za Tobą — systematyczność działa!` });
+  }
+  if (stats.scores.length >= 3) {
+    const avg = Math.round(stats.scores.reduce((a,b) => a+b, 0) / stats.scores.length);
+    if (avg >= 80) messages.push({ i: '⚡', t: `Średnia ${avg}% — ogarniasz!` });
+    else if (avg >= 60) messages.push({ i: '📈', t: `Średnia ${avg}% — z każdym quizem lepiej!` });
+  }
+  if (messages.length === 0) {
+    banner.style.display = 'none';
+    return;
+  }
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+  $('motivationIcon').textContent = msg.i;
+  $('motivationText').textContent = msg.t;
+  banner.style.display = 'flex';
 }
 
 function saveStats(stats) {
@@ -3675,15 +3751,20 @@ function showTopicSummary() {
     return;
   }
 
-  const material = state.lastMaterial;
-  // Extract a preview: first ~1000 chars, cut at sentence boundary
-  let preview = material.slice(0, 1200);
-  const lastDot = preview.lastIndexOf('.');
-  if (lastDot > 600) preview = preview.slice(0, lastDot + 1);
-  else if (preview.length > 1000) preview = preview.slice(0, 1000) + '...';
+  $('summaryTitle').textContent = 'Ściąga — ' + state.topic;
 
-  $('summaryTitle').textContent = 'Sciaga — ' + state.topic;
-  $('summaryContent').textContent = preview;
+  if (state._summaryData?.summary) {
+    // AI-generated summary
+    $('summaryContent').innerHTML = esc(state._summaryData.summary).replace(/\n/g, '<br>');
+  } else {
+    // Fallback: raw material preview
+    const material = state.lastMaterial;
+    let preview = material.slice(0, 1200);
+    const lastDot = preview.lastIndexOf('.');
+    if (lastDot > 600) preview = preview.slice(0, lastDot + 1);
+    else if (preview.length > 1000) preview = preview.slice(0, 1000) + '...';
+    $('summaryContent').textContent = preview;
+  }
   showScreen('summary');
 }
 
@@ -3707,7 +3788,8 @@ function startFlashcards() {
         correctAnswer: (a.correct + '. ' + (correctOpt ? correctOpt.text : '')),
         explanation: q.explanation || '',
         remember: q.remember || '',
-        trick: q.trick || ''
+        trick: q.trick || '',
+        realLife: q.realLife || ''
       };
     });
 
@@ -3748,6 +3830,13 @@ function renderFlashcard() {
     $('fcTrick').textContent = 'Ciekawostka: ' + card.trick;
   } else {
     $('fcTrick').style.display = 'none';
+  }
+
+  if (card.realLife) {
+    $('fcRealLife').style.display = 'block';
+    $('fcRealLife').textContent = 'W praktyce: ' + card.realLife;
+  } else {
+    $('fcRealLife').style.display = 'none';
   }
 
   // Reset flip
