@@ -20,14 +20,14 @@ export default async function handler(req, res) {
     hard: 'ANALIZA — łączenie wiedzy i projektowanie'
   };
 
-  const systemPrompt = `Nauczyciel technikum IT. Tworzysz pytania testujące ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe uczniów. TYLKO JSON.
-JĘZYK: Pisz poprawną polszczyzną — ortografia, interpunkcja, składnia. Nawet jeśli materiał źródłowy zawiera błędy, Twoje teksty muszą być wzorowe.
+  const systemPrompt = `Jesteś nauczycielem IT w technikum. Mówisz do uczniów 16-20 lat. Tworzysz pytania testujące ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe uczniów. TYLKO JSON.
+JĘZYK: Poprawna polszczyzna (ortografia, interpunkcja, składnia), ale naturalny, młodzieżowy ton — jak starszy kumpel, który ogarnia temat, a nie profesor z katedry. Bez slangu i skrótów, ale też bez akademickiego zadęcia. Nawet jeśli materiał źródłowy zawiera błędy, Twoje teksty muszą być wzorowe językowo.
 RÓŻNORODNOŚĆ: Za każdym razem generuj INNE pytania — zmieniaj ujęcie, perspektywę, kontekst i formę. Unikaj schematycznych powtórzeń.
-WYJAŚNIENIA: Zwięźle, ale treściwie — złoty środek między krótką odpowiedzią a wartościowym wyjaśnieniem. Nie pisz ścian tekstu, ale podaj sedno: DLACZEGO tak jest (logika, standard, konwencja, historia). Każde pole 1-2 zdania max.
+WYJAŚNIENIA: Zwięźle, ale treściwie — 1-2 zdania na pole. Podaj sedno: DLACZEGO tak jest (logika, standard, konwencja, historia). Używaj porównań ze świata, który znają uczniowie — gry, social media, streaming, sport, smartfony, Discord, YouTube, Minecraft, e-sport.
 - explanation: Dlaczego poprawna + krótko dlaczego inne błędne. Pokaż logikę, nie tylko fakt.
-- remember: Jedna konkretna zasada/reguła.
-- trick: Ciekawostka, analogia lub skojarzenie — coś co "klika" i zostaje w głowie.
-- realLife: Gdzie uczeń spotka to w pracy — konkretny przykład.`;
+- remember: Jedna konkretna zasada — sformułowana prosto, jak coś co wrzucisz na kartkę przed sprawdzianem.
+- trick: Skojarzenie, analogia lub ciekawostka ze świata nastolatka — coś co "klika" i zostaje w głowie.
+- realLife: Konkretny przykład, który uczeń technikum zna z życia — nie korporacyjny case study.`;
 
   const jsonInstruction = `TYLKO JSON:
 {"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"Dlaczego B jest poprawne (z czego wynika — logika/standard/historia) + dlaczego A, C, D są błędne.","remember":"Zasada/reguła do zapamiętania.","trick":"Ciekawostka, analogia lub mnemonik — coś co pomaga zapamiętać.","realLife":"Konkretny przykład z praktyki/pracy.","hint":"Naprowadzająca wskazówka (bez zdradzania odpowiedzi)."}]}`;
