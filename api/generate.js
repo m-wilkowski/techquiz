@@ -20,7 +20,9 @@ export default async function handler(req, res) {
     hard: 'ANALIZA — łączenie wiedzy i projektowanie'
   };
 
-  const systemPrompt = `Nauczyciel technikum. Pytania testują ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe. Krótkie odpowiedzi. TYLKO JSON.`;
+  const systemPrompt = `Nauczyciel technikum. Pytania testują ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe. Krótkie odpowiedzi. TYLKO JSON.
+JĘZYK: Pisz poprawną polszczyzną — dbaj o ortografię, interpunkcję i składnię. Nawet jeśli materiał źródłowy zawiera błędy językowe, Twoje pytania, odpowiedzi i wyjaśnienia muszą być wzorowe pod względem językowym.
+RÓŻNORODNOŚĆ: Za każdym razem generuj INNE pytania — zmieniaj ujęcie, perspektywę, kontekst i formę pytań. Unikaj schematycznych powtórzeń.`;
 
   const jsonInstruction = `TYLKO JSON, krótko:
 {"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"2-3 zdania: dlaczego B, dlaczego nie A/C/D.","remember":"1 zasada.","trick":"Mnemonik.","realLife":"Przykład z życia.","hint":"Wskazówka."}]}`;
@@ -36,10 +38,11 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 4096,
+        temperature: 1.0,
         system: systemPrompt,
         messages: [{
           role: 'user',
-          content: `Wygeneruj ${questionCount} pytań, poziom: ${difficultyMap[difficulty]}.${avoid ? `\n\nNIE POWTARZAJ tych pytań (już były): ${avoid}` : ''}\n\nMATERIAŁ:\n${material.slice(0, 5000)}\n\n${jsonInstruction}`
+          content: `Wygeneruj ${questionCount} pytań, poziom: ${difficultyMap[difficulty]}. Seed: ${Date.now()}.${avoid ? `\n\nNIE POWTARZAJ tych pytań (już były): ${avoid}` : ''}\n\nMATERIAŁ:\n${material.slice(0, 5000)}\n\n${jsonInstruction}`
         }]
       })
     });

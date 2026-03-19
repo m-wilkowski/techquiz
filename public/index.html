@@ -2310,8 +2310,8 @@ select:focus { border-color: var(--accent); }
   <div class="screen" id="screenSummary">
     <div class="card summary-container">
       <div class="card-label">Przeczytaj przed quizem</div>
-      <div class="summary-title" id="summaryTitle">Sciaga — najwazniejsze pojecia</div>
-      <div class="summary-subtitle" id="summarySubtitle">Przejrzyj kluczowe fragmenty materialu zanim zaczniesz quiz</div>
+      <div class="summary-title" id="summaryTitle">Ściąga — najważniejsze pojęcia</div>
+      <div class="summary-subtitle" id="summarySubtitle">Przejrzyj kluczowe fragmenty materiału, zanim zaczniesz quiz</div>
       <div class="summary-content" id="summaryContent"></div>
       <button class="btn btn-primary" id="btnStartAfterSummary">Rozumiem, zaczynaj quiz &rarr;</button>
     </div>
@@ -2326,7 +2326,7 @@ select:focus { border-color: var(--accent); }
           <div class="flashcard-front">
             <div class="fc-label">Pytanie</div>
             <div class="fc-question" id="fcQuestion"></div>
-            <div class="fc-tap">Kliknij, aby odwrocic</div>
+            <div class="fc-tap">Kliknij, aby odwrócić</div>
           </div>
           <div class="flashcard-back">
             <div class="fc-correct" id="fcCorrect"></div>
@@ -2338,13 +2338,13 @@ select:focus { border-color: var(--accent); }
       </div>
       <div class="flashcard-actions" id="flashcardActions">
         <button class="btn btn-fc-know" id="btnFcKnow">Umiem &#10003;</button>
-        <button class="btn btn-fc-repeat" id="btnFcRepeat">Powtorz &#10007;</button>
+        <button class="btn btn-fc-repeat" id="btnFcRepeat">Powtórz &#10007;</button>
       </div>
     </div>
     <div class="flashcard-done" id="flashcardDone" style="display:none">
       <h3>Wszystkie fiszki opanowane!</h3>
-      <p>Swietna robota — znasz odpowiedzi na wszystkie bledne pytania.</p>
-      <button class="btn btn-primary" id="btnFcBackToResults">Wroc do wynikow</button>
+      <p>Świetna robota — znasz odpowiedzi na wszystkie błędne pytania.</p>
+      <button class="btn btn-primary" id="btnFcBackToResults">Wróć do wyników</button>
     </div>
   </div>
 
@@ -3738,7 +3738,7 @@ function renderFlashcard() {
 
   if (card.remember) {
     $('fcRemember').style.display = 'block';
-    $('fcRemember').textContent = 'Zapamietaj: ' + card.remember;
+    $('fcRemember').textContent = 'Zapamiętaj: ' + card.remember;
   } else {
     $('fcRemember').style.display = 'none';
   }
@@ -3834,7 +3834,7 @@ $('btnSavePdf').addEventListener('click', () => {
 
   // Fill print header
   $('printMeta').innerHTML =
-    `<strong>Uczen:</strong> ${profileName}<br>` +
+    `<strong>Uczeń:</strong> ${profileName}<br>` +
     `<strong>Temat:</strong> ${state.topic}<br>` +
     `<strong>Data:</strong> ${dateStr}<br>` +
     `<strong>Wynik:</strong> ${correct}/${total} (${pct}%)`;
