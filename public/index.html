@@ -3045,6 +3045,17 @@ async function generateQuiz() {
       // Deduplicate and renumber
       const existingTexts = new Set(allQuestions.map(q => q.question));
       const newQs = data.questions.filter(q => !existingTexts.has(q.question));
+      // Shuffle options within each question so correct answer isn't always in same position
+      newQs.forEach(q => {
+        const correctText = q.options.find(o => o.id === q.correct)?.text;
+        for (let i = q.options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+        }
+        q.options.forEach((o, idx) => { o.id = ['A','B','C','D'][idx]; });
+        const newCorrect = q.options.find(o => o.text === correctText);
+        if (newCorrect) q.correct = newCorrect.id;
+      });
       newQs.forEach((q, i) => { q.id = allQuestions.length + i + 1; });
       allQuestions = allQuestions.concat(newQs);
       if (data.topic) topic = data.topic;
@@ -3066,6 +3077,13 @@ async function generateQuiz() {
     } else {
       state._summaryData = null;
     }
+
+    // Shuffle questions so order is always different
+    for (let i = allQuestions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
+    }
+    allQuestions.forEach((q, i) => { q.id = i + 1; });
 
     state.questions = allQuestions;
     state.topic = topic;
