@@ -3616,6 +3616,7 @@ function showResults() {
     localStorage.removeItem(`tq_${id}_stats`);
     localStorage.removeItem(`tq_${id}_history`);
     localStorage.removeItem(`tq_${id}_session`);
+    localStorage.removeItem(`tq_${id}_materials`);
 
     // Clear Supabase
     try {
@@ -3663,6 +3664,7 @@ $('btnClearHistory').addEventListener('click', () => {
   // Clear from Supabase
   supaRest(`history?profile_id=eq.${state.profile}`, { method: 'DELETE' }).catch(() => {});
   renderHistory();
+  renderSparkline();
 });
 
 // ─── RELOAD QUIZ (new questions, same material) ─────────────────────────────
@@ -3685,6 +3687,8 @@ $('btnQuitQuiz').addEventListener('click', () => {
   if (state.questions.length > 0) saveSession();
   $('headerScore').style.display = 'none';
   renderHistory();
+  renderMaterials();
+  renderSparkline();
   showScreen('upload');
 });
 
@@ -3796,6 +3800,8 @@ $('btnNewMaterial').addEventListener('click', () => {
   $('headerScore').style.display = 'none';
   clearSession();
   renderHistory();
+  renderMaterials();
+  renderSparkline();
   showScreen('upload');
 });
 
