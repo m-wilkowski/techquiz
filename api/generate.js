@@ -22,8 +22,8 @@ export default async function handler(req, res) {
 
   const systemPrompt = `Nauczyciel IT, technikum, uczniowie 16-20 lat. Pytania testują ROZUMIENIE. Błędne odpowiedzi = typowe błędy myślowe. Poprawna polszczyzna, naturalny młodzieżowy ton. Różne pytania za każdym razem. TYLKO JSON, krótko.`;
 
-  const jsonInstruction = `TYLKO JSON:
-{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"1-2 zdania: dlaczego B + dlaczego nie inne. Pokaż logikę.","remember":"1 zasada do zapamiętania.","trick":"Ciekawostka/analogia ze świata nastolatka.","realLife":"Przykład z praktyki/życia.","hint":"Wskazówka bez odpowiedzi."}]}`;
+  const jsonInstruction = `TYLKO JSON, każde pole max 1-2 zdania:
+{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"krótko"},{"id":"B","text":"krótko"},{"id":"C","text":"krótko"},{"id":"D","text":"krótko"}],"correct":"B","explanation":"1-2 zdania: dlaczego B + dlaczego nie inne.","remember":"1 zasada.","trick":"Ciekawostka/analogia.","realLife":"Przykład z życia.","hint":"Wskazówka."}]}`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -35,8 +35,8 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
-        temperature: 1.0,
+        max_tokens: 3000,
+        temperature: 0.9,
         system: systemPrompt,
         messages: [{
           role: 'user',
