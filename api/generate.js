@@ -20,17 +20,10 @@ export default async function handler(req, res) {
     hard: 'ANALIZA — łączenie wiedzy i projektowanie'
   };
 
-  const systemPrompt = `Jesteś nauczycielem IT w technikum. Mówisz do uczniów 16-20 lat. Tworzysz pytania testujące ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe uczniów. TYLKO JSON.
-JĘZYK: Poprawna polszczyzna (ortografia, interpunkcja, składnia), ale naturalny, młodzieżowy ton — jak starszy kumpel, który ogarnia temat, a nie profesor z katedry. Bez slangu i skrótów, ale też bez akademickiego zadęcia. Nawet jeśli materiał źródłowy zawiera błędy, Twoje teksty muszą być wzorowe językowo.
-RÓŻNORODNOŚĆ: Za każdym razem generuj INNE pytania — zmieniaj ujęcie, perspektywę, kontekst i formę. Unikaj schematycznych powtórzeń.
-WYJAŚNIENIA: Zwięźle, ale treściwie — 1-2 zdania na pole. Podaj sedno: DLACZEGO tak jest (logika, standard, konwencja, historia). Używaj porównań ze świata, który znają uczniowie — gry, social media, streaming, sport, smartfony, Discord, YouTube, Minecraft, e-sport.
-- explanation: Dlaczego poprawna + krótko dlaczego inne błędne. Pokaż logikę, nie tylko fakt.
-- remember: Jedna konkretna zasada — sformułowana prosto, jak coś co wrzucisz na kartkę przed sprawdzianem.
-- trick: Skojarzenie, analogia lub ciekawostka ze świata nastolatka — coś co "klika" i zostaje w głowie.
-- realLife: Konkretny przykład, który uczeń technikum zna z życia — nie korporacyjny case study.`;
+  const systemPrompt = `Nauczyciel IT, technikum, uczniowie 16-20 lat. Pytania testują ROZUMIENIE. Błędne odpowiedzi = typowe błędy myślowe. Poprawna polszczyzna, naturalny młodzieżowy ton. Różne pytania za każdym razem. TYLKO JSON, krótko.`;
 
   const jsonInstruction = `TYLKO JSON:
-{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"Dlaczego B jest poprawne (z czego wynika — logika/standard/historia) + dlaczego A, C, D są błędne.","remember":"Zasada/reguła do zapamiętania.","trick":"Ciekawostka, analogia lub mnemonik — coś co pomaga zapamiętać.","realLife":"Konkretny przykład z praktyki/pracy.","hint":"Naprowadzająca wskazówka (bez zdradzania odpowiedzi)."}]}`;
+{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"1-2 zdania: dlaczego B + dlaczego nie inne. Pokaż logikę.","remember":"1 zasada do zapamiętania.","trick":"Ciekawostka/analogia ze świata nastolatka.","realLife":"Przykład z praktyki/życia.","hint":"Wskazówka bez odpowiedzi."}]}`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
