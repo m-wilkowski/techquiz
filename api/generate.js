@@ -20,12 +20,17 @@ export default async function handler(req, res) {
     hard: 'ANALIZA — łączenie wiedzy i projektowanie'
   };
 
-  const systemPrompt = `Nauczyciel technikum. Pytania testują ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe. Krótkie odpowiedzi. TYLKO JSON.
-JĘZYK: Pisz poprawną polszczyzną — dbaj o ortografię, interpunkcję i składnię. Nawet jeśli materiał źródłowy zawiera błędy językowe, Twoje pytania, odpowiedzi i wyjaśnienia muszą być wzorowe pod względem językowym.
-RÓŻNORODNOŚĆ: Za każdym razem generuj INNE pytania — zmieniaj ujęcie, perspektywę, kontekst i formę pytań. Unikaj schematycznych powtórzeń.`;
+  const systemPrompt = `Nauczyciel technikum IT. Tworzysz pytania testujące ROZUMIENIE mechanizmów. Błędne odpowiedzi = typowe błędy myślowe uczniów. TYLKO JSON.
+JĘZYK: Pisz poprawną polszczyzną — ortografia, interpunkcja, składnia. Nawet jeśli materiał źródłowy zawiera błędy, Twoje teksty muszą być wzorowe.
+RÓŻNORODNOŚĆ: Za każdym razem generuj INNE pytania — zmieniaj ujęcie, perspektywę, kontekst i formę. Unikaj schematycznych powtórzeń.
+WYJAŚNIENIA: Zwięźle, ale treściwie — złoty środek między krótką odpowiedzią a wartościowym wyjaśnieniem. Nie pisz ścian tekstu, ale podaj sedno: DLACZEGO tak jest (logika, standard, konwencja, historia). Każde pole 1-2 zdania max.
+- explanation: Dlaczego poprawna + krótko dlaczego inne błędne. Pokaż logikę, nie tylko fakt.
+- remember: Jedna konkretna zasada/reguła.
+- trick: Ciekawostka, analogia lub skojarzenie — coś co "klika" i zostaje w głowie.
+- realLife: Gdzie uczeń spotka to w pracy — konkretny przykład.`;
 
-  const jsonInstruction = `TYLKO JSON, krótko:
-{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"2-3 zdania: dlaczego B, dlaczego nie A/C/D.","remember":"1 zasada.","trick":"Mnemonik.","realLife":"Przykład z życia.","hint":"Wskazówka."}]}`;
+  const jsonInstruction = `TYLKO JSON:
+{"topic":"temat","questions":[{"id":1,"question":"?","options":[{"id":"A","text":"..."},{"id":"B","text":"..."},{"id":"C","text":"..."},{"id":"D","text":"..."}],"correct":"B","explanation":"Dlaczego B jest poprawne (z czego wynika — logika/standard/historia) + dlaczego A, C, D są błędne.","remember":"Zasada/reguła do zapamiętania.","trick":"Ciekawostka, analogia lub mnemonik — coś co pomaga zapamiętać.","realLife":"Konkretny przykład z praktyki/pracy.","hint":"Naprowadzająca wskazówka (bez zdradzania odpowiedzi)."}]}`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {

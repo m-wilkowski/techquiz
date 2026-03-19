@@ -3186,11 +3186,11 @@ function selectAnswer(chosenId) {
     $('learnRemember').classList.add('show');
   }
   if (q.trick) {
-    $('learnTrick').innerHTML = '<strong>🧠 Trick:</strong> ' + esc(q.trick);
+    $('learnTrick').innerHTML = '<strong>🧠 Ciekawostka:</strong> ' + esc(q.trick);
     $('learnTrick').classList.add('show');
   }
   if (q.realLife) {
-    $('learnReallife').innerHTML = '<strong>🌍 Z życia:</strong> ' + esc(q.realLife);
+    $('learnReallife').innerHTML = '<strong>🌍 W praktyce:</strong> ' + esc(q.realLife);
     $('learnReallife').classList.add('show');
   }
 
@@ -3745,7 +3745,7 @@ function renderFlashcard() {
 
   if (card.trick) {
     $('fcTrick').style.display = 'block';
-    $('fcTrick').textContent = 'Trick: ' + card.trick;
+    $('fcTrick').textContent = 'Ciekawostka: ' + card.trick;
   } else {
     $('fcTrick').style.display = 'none';
   }
