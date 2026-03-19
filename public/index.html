@@ -2974,9 +2974,11 @@ async function generateQuiz() {
   const count = state._retryCount || parseInt($('questionCount').value);
   const difficulty = state._retryDifficulty || $('difficulty').value;
   const focusTopics = state._retryFocusTopics || '';
+  const avoidPrevious = state._avoidQuestions || '';
   state._retryCount = null;
   state._retryDifficulty = null;
   state._retryFocusTopics = null;
+  state._avoidQuestions = null;
 
   $('btnGenerate').disabled = true;
   showLoading('Analizuję materiał...');
@@ -3016,7 +3018,7 @@ async function generateQuiz() {
           material: material.slice(0, 6000),
           questionCount: batchCount,
           difficulty,
-          avoid: existingQuestions ? existingQuestions.slice(0, 1000) : '',
+          avoid: [avoidPrevious, existingQuestions].filter(Boolean).join('; ').slice(0, 1000),
           focus: focusTopics ? focusTopics.slice(0, 1000) : ''
         })
       });
@@ -3478,6 +3480,7 @@ $('btnReloadQuiz').addEventListener('click', () => {
   clearInterval(state._timerInterval);
   state._retryCount = state.questions.length;
   state._skipSummary = true;
+  state._avoidQuestions = state.questions.map(q => q.question).join('; ').slice(0, 1000);
   state.questions = [];
   state.answers = [];
   state.score = 0;
@@ -3525,6 +3528,7 @@ $('btnRetry').addEventListener('click', () => {
   state._retryCount = state.questions.length;
   state._retryDifficulty = null; // use current DOM value
   state._skipSummary = true;
+  state._avoidQuestions = state.questions.map(q => q.question).join('; ').slice(0, 1000);
   state.questions = [];
   state.answers = [];
   state.score = 0;
