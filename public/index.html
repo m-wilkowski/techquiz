@@ -2666,7 +2666,7 @@ document.querySelectorAll('.profile-card').forEach(card => {
   card.addEventListener('click', (e) => {
     // Don't select profile if clicking resume buttons
     if (e.target.closest('.btn-resume')) return;
-    selectProfile(card.dataset.profile);
+    selectProfile(card.dataset.profile).catch(e => console.warn('Profile load error:', e));
   });
 });
 
@@ -2703,7 +2703,6 @@ document.querySelectorAll('.btn-resume').forEach(btn => {
         state.hintsEnabled = session.hintsEnabled;
         state.lastMaterial = session.lastMaterial || '';
         state.fileText = session.fileText || '';
-        state.fileBase64 = session.fileBase64 || null;
         let resumeAt = session.current || 0;
         if (state.answers.length > resumeAt) resumeAt = state.answers.length;
         state.current = resumeAt;
@@ -3551,7 +3550,6 @@ $('btnRetryWrong').addEventListener('click', async () => {
 $('btnNewMaterial').addEventListener('click', () => {
   state.file = null;
   state.fileText = '';
-  state.fileBase64 = null;
   state.questions = [];
   state.answers = [];
   state.score = 0;
