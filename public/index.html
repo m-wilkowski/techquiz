@@ -2674,6 +2674,8 @@ function saveSession() {
     answers: state.answers,
     score: state.score,
     hintsEnabled: state.hintsEnabled,
+    examMode: state.examMode || false,
+    examTimeLimit: state.examTimeLimit || 0,
     lastMaterial: state.lastMaterial,
     fileText: state.fileText || ''
   };
@@ -2791,6 +2793,8 @@ document.querySelectorAll('.btn-resume').forEach(btn => {
         state.answers = session.answers || [];
         state.score = session.score || 0;
         state.hintsEnabled = session.hintsEnabled;
+        state.examMode = session.examMode || false;
+        state.examTimeLimit = session.examTimeLimit || 0;
         state.lastMaterial = session.lastMaterial || '';
         state.fileText = session.fileText || '';
         let resumeAt = session.current || 0;
@@ -3283,6 +3287,7 @@ function renderQuestion() {
 }
 
 function examTimeOut() {
+  if (state.answers.some(a => a.questionId === state.current)) return;
   const q = state.questions[state.current];
   state.answers.push({
     questionId: state.current, chosen: 'TIMEOUT', correct: q.correct,
@@ -3299,6 +3304,7 @@ function examTimeOut() {
 }
 
 function selectAnswer(chosenId) {
+  if (state.answers.some(a => a.questionId === state.current)) return;
   const q = state.questions[state.current];
   const correct = q.correct;
   const isIdk = chosenId === '__IDK__';
@@ -3703,7 +3709,7 @@ $('btnIdk').addEventListener('click', () => {
 
 // ─── RETRY BUTTONS ──────────────────────────────────────────────────────────
 $('btnRetry').addEventListener('click', () => {
-  // Preserve original settings for retry
+  clearInterval(state._timerInterval);
   state._retryCount = state.questions.length;
   state._retryDifficulty = null; // use current DOM value
   state._skipSummary = true;
@@ -3745,6 +3751,7 @@ function shuffleQuiz() {
 }
 
 $('btnRestartSame').addEventListener('click', () => {
+  clearInterval(state._timerInterval);
   shuffleQuiz();
   state.answers = [];
   state.score = 0;
@@ -3756,7 +3763,7 @@ $('btnRestartSame').addEventListener('click', () => {
 });
 
 $('btnRetryWrong').addEventListener('click', async () => {
-  // Regenerate NEW questions focused on weak topics
+  clearInterval(state._timerInterval);
   const wrongQs = state.answers
     .filter(a => !a.isCorrect)
     .map(a => state.questions[a.questionId]);
@@ -4003,6 +4010,7 @@ let fcDeck = [];
 let fcIndex = 0;
 
 function startFlashcards() {
+  clearInterval(state._timerInterval);
   // Build deck from wrong/IDK answers
   fcDeck = state.answers
     .filter(a => !a.isCorrect)
